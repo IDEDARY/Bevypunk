@@ -1,0 +1,100 @@
+#======================#
+#=== WORKSPACE INFO ===#
+
+[workspace]
+  resolver = "2"
+  members = ["app", "crates/*"]
+
+[workspace.package]
+  authors     = ["IDEDARY"]
+  version     = "0.0.1"
+  edition     = "2021"
+  license     = "MIT OR Apache-2.0"
+  repository  = "https://github.com/idedary/bevypunk"
+
+#========================#
+#=== PROFILE SETTINGS ===#
+
+[profile.dev]
+  debug = 0
+  strip = "debuginfo"
+  opt-level = 1
+
+[profile.dev.package."*"]
+  opt-level = 3
+
+[profile.release]
+  opt-level = 3
+  panic = 'abort'
+  debug = 0
+  strip = true
+  lto = "thin"
+  codegen-units = 1
+
+#===============================#
+#=== DEPENDENCIES & FEATURES ===#
+
+[workspace.dependencies]
+
+  # GAME CRATES
+  game_movies = { path = "crates/game_movies" }
+  game_vfx = { path = "crates/game_vfx" }
+
+  #===========================#
+  #=== GAME ENGINE SOURCE === #
+
+  # GAME ENGINE
+  bevy = { version = "^0.15.1", default-features = false, features = [
+    "animation",
+    "bevy_asset",
+    "bevy_color",
+    "bevy_core_pipeline",
+    "bevy_gilrs",
+    "bevy_gizmos",
+    "bevy_gltf",
+    "bevy_mesh_picking_backend",
+    "bevy_pbr",
+    "bevy_picking",
+    "bevy_render",
+    "bevy_scene",
+    "bevy_sprite",
+    "bevy_sprite_picking_backend",
+    "bevy_state",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_ui_picking_backend",
+    "bevy_window",
+    "bevy_winit",
+    "custom_cursor",
+    "hdr",
+    "multi_threaded",
+    "png",
+    "smaa_luts",
+    "sysinfo_plugin",
+    "tonemapping_luts",
+    "webgl2",
+    "x11",
+  ]}
+  log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
+
+  #===============================#
+  #=== GAME ENGINE EXTENSIONS === #
+
+  # ASSETS
+  vleue_kinetoscope = { git = "https://github.com/IDEDARY/vleue_kinetoscope", branch = "pause-pr"}
+  bevy_embedded_assets = { version = "^0.12.0" }
+
+  # AUDIO
+  bevy_kira_audio = { version = "^0.22.0" }
+
+  # USER INTERFACE
+  bevy_lunex = { path = "../bevy_lunex/crate"}
+
+  # PHYSICS
+  avian3d = { version = "^0.2.0" }
+
+  #===========================#
+  #=== RUST MISCELLANEOUS === #
+
+  # OTHER
+  rand = "0.8.5"
