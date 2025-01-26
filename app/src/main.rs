@@ -49,7 +49,7 @@ fn main() -> AppExit {
 
     // Bundle all game assets into the binary and add general plugins
     app.add_plugins(EmbeddedAssetPlugin { mode: PluginMode::ReplaceDefault });
-    app.add_plugins((DefaultPlugins, AnimatedImagePlugin, AudioPlugin));
+    app.add_plugins((DefaultPlugins, AnimatedImagePlugin, AudioPlugin, UiLunexPlugin));
 
     // Set the correct app state
     if !args.skip_intro {
@@ -83,21 +83,20 @@ fn main() -> AppExit {
 
 
 
-// #==============================#
-// #=== IMPORTS FOR THIS CRATE ===#
+// #======================#
+// #=== THE GAME LOGIC ===#
 
 fn spawn_camera(mut commands: Commands) {
     // Spawn the camera
-    commands.spawn((Camera2d, Camera { hdr: true, ..default() }, Bloom::OLD_SCHOOL, VFXBloomFlicker));
+    commands.spawn((Camera2d, Camera { hdr: true, ..default() }, Bloom::OLD_SCHOOL, VFXBloomFlicker, UiSourceCamera::<0>));
 }
 
 fn spawn_intro(mut commands: Commands, asset_server: Res<AssetServer>, priority_assets: Res<PriorityAssets>) {
-
     // Start the intro together with music
     commands.spawn(
         Movie::play(priority_assets.video.get("intro").unwrap().clone(), asset_server.load("audio/intro.ogg")).playback(MoviePlayback::Despawn)
     // Add observer that will change the state once the movie ends
-    ).observe(|_trigger: Trigger<MovieEnded>, mut next: ResMut<NextState<AppState>>| {
+    ).observe(|_: Trigger<MovieEnded>, mut next: ResMut<NextState<AppState>>| {
         next.set(AppState::MainMenu);
     });
 }
@@ -105,13 +104,13 @@ fn spawn_intro(mut commands: Commands, asset_server: Res<AssetServer>, priority_
 fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
-        UiRoot,
-        Visibility::default(),
-        Transform::default(),
+        UiLayoutRoot,
+        UiFetchFromCamera::<0>,
     )).with_children(|ui| {
 
         ui.spawn((
             UiLayout::window(),
+            Dimension::from((1280.0, 720.0)),
             Sprite::from_image(asset_server.load("images/ui/background.png")),
         ));
     });
