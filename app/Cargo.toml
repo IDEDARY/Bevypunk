@@ -34,3 +34,6 @@
 
   # PHYSICS
   avian3d = { workspace = true }
+
+  # OTHER
+  clap = { workspace = true }

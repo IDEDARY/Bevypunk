@@ -1,15 +1,25 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "cargo",
-			"command": "run",
-			"args": ["--bin", "bevypunk"],
-			"problemMatcher": [
-				"$rustc"
-			],
-			"group": "build",
-			"label": "Run 1"
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cargo",
+            "command": "run",
+            "args": ["--bin", "bevypunk", "--", "--skip-intro"],
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "group": "build",
+            "label": "Run 1"
+        },
+        {
+            "type": "cargo",
+            "command": "run",
+            "args": ["--bin", "bevypunk"],
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "group": "build",
+            "label": "Run 2"
+        }
+    ]
 }
