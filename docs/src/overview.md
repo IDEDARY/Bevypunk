@@ -1,0 +1,1 @@
+This book contains tips and guides on how to properly manage and develop a game in Bevy.

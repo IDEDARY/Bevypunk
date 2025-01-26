@@ -1,0 +1,9 @@
+#=================#
+#=== DOCS INFO ===#
+
+[book]
+  title = "Bevypunk Documentation"
+  authors = ["IDEDARY"]
+  multilingual = false
+  language = "en"
+  src = "src"
