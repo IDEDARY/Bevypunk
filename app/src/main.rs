@@ -40,7 +40,6 @@ enum AppState {
     // LoadingScreen,
 }
 
-
 fn main() -> AppExit {
     // ____________________________________
     // ----- NEW APPLICATION INSTANCE -----
@@ -64,7 +63,7 @@ fn main() -> AppExit {
 
     // Load the game intro if required
     if !args.skip_intro {
-        let intro = AnimatedImageLoader::load_now_from_bytes(include_bytes!("../../assets/images/movies/intro_720p.webp"),"webp", &mut app).expect("Priority load failed");
+        let intro = AnimatedImageLoader::load_now_from_bytes(include_bytes!("../../assets/movies/intro_720p.webp"),"webp", &mut app).expect("Priority load failed");
         priority_assets.video.insert("intro".to_string(), intro);
     }
 
@@ -82,7 +81,6 @@ fn main() -> AppExit {
 }
 
 
-
 // #======================#
 // #=== THE GAME LOGIC ===#
 
@@ -92,22 +90,35 @@ fn spawn_camera(mut commands: Commands) {
 }
 
 fn spawn_intro(mut commands: Commands, asset_server: Res<AssetServer>, priority_assets: Res<PriorityAssets>) {
-    // Start the intro together with music
-    commands.spawn(
-        Movie::play(priority_assets.video.get("intro").unwrap().clone(), asset_server.load("audio/intro.ogg")).playback(MoviePlayback::Despawn)
-    // Add observer that will change the state once the movie ends
-    ).observe(|_: Trigger<MovieEnded>, mut next: ResMut<NextState<AppState>>| {
-        next.set(AppState::MainMenu);
-    });
-}
-
-fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
-
+    // Create UI
     commands.spawn((
         UiLayoutRoot,
         UiFetchFromCamera::<0>,
     )).with_children(|ui| {
 
+        // Start the intro together with music
+        ui.spawn((
+            UiLayout::window(),
+            Movie::play(priority_assets.video.get("intro").unwrap().clone(), asset_server.load("audio/intro.ogg")).playback(MoviePlayback::Stop)
+
+        // Add observer that will change the state once the movie ends
+        )).observe(|_: Trigger<MovieEnded>, mut next: ResMut<NextState<AppState>>, mut commands: Commands, ui: Single<Entity, With<UiLayoutRoot>>| {
+
+            // Despawn the UI and change the state
+            commands.entity(*ui).despawn_recursive();
+            next.set(AppState::MainMenu);
+        });
+    });
+}
+
+fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // Create UI
+    commands.spawn((
+        UiLayoutRoot,
+        UiFetchFromCamera::<0>,
+    )).with_children(|ui| {
+
+        // Spawn the background
         ui.spawn((
             UiLayout::window(),
             Dimension::from((1280.0, 720.0)),
