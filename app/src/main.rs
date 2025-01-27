@@ -49,6 +49,7 @@ fn main() -> AppExit {
     // Bundle all game assets into the binary and add general plugins
     app.add_plugins(EmbeddedAssetPlugin { mode: PluginMode::ReplaceDefault });
     app.add_plugins((DefaultPlugins, AnimatedImagePlugin, AudioPlugin, UiLunexPlugin));
+    //app.add_plugins(UiLunexDebugPlugin);
 
     // Set the correct app state
     if !args.skip_intro {
@@ -120,6 +121,7 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
         // Spawn the background
         ui.spawn((
+            Name::new("Background"),
             UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
             Sprite::from_image(asset_server.load("images/ui/background.png")),
         ));
@@ -131,6 +133,7 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
             // Spawn the panel
             ui.spawn((
+                Name::new("Panel"),
                 UiLayout::window().x(Rl(50.0)).anchor(Anchor::TopCenter).size(Rl(105.0)).pack(),
                 Sprite::from_image(asset_server.load("images/ui/panel_menu.png")),
             ));
@@ -142,10 +145,93 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
                 // Spawn the logo
                 ui.spawn((
+                    Name::new("Logo"),
                     UiLayout::solid().size((1240.0, 381.0)).pack(),
                     Sprite::from_image(asset_server.load("images/ui/title.png")),
                 ));
             });
+
+            // Spawn button boundary
+            ui.spawn((
+                UiLayout::window().pos(Rl((22.0, 33.0))).size(Rl((55.0, 34.0))).pack(),
+            )).with_children(|ui| {
+
+                // Spawn buttons
+                let gap = 3.0;
+                let size = 14.0;
+                let mut offset = 0.0;
+                for button in ["Continue", "New Game", "Load Game", "Settings", "Additional Content", "Credits", "Quit Game"] {
+
+                    // Spawn the button
+                    ui.spawn((
+                        Name::new(button),
+                        UiLayout::window().y(Rl(offset)).size(Rl((100.0, size))).pack(),
+                    )).with_children(|ui| {
+
+                        // Spawn the image
+                        ui.spawn((
+                            UiLayout::window().full().pack(),
+                            UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.15)),
+                            Sprite {
+                                image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
+                                image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                ..default()
+                            },
+                        )).with_children(|ui| {
+                
+                            // Spawn the text
+                            ui.spawn((
+                                UiLayout::window().pos((Rh(40.0), Rl(50.0))).anchor(Anchor::CenterLeft).pack(),
+                                UiColor::from(Color::BEVYPUNK_RED),
+                                UiTextSize::from(Rh(60.0)),
+                                Text2d::new(button.to_ascii_uppercase()),
+                                TextFont {
+                                    font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
+                                    font_size: 64.0,
+                                    ..default()
+                                },
+                            ));
+                        });
+                    });
+
+                    offset += gap + size;
+                }
+
+            });
+
+
+            /* // Spawn the button
+            ui.spawn((
+                Name::new("CONTINUE"),
+                UiLayout::window().x(Rl(20.0)).y(Rl(56.0)).size(Rl((62.0, 6.5))).pack(),
+            )).with_children(|ui| {
+
+                // Spawn the image
+                ui.spawn((
+                    UiLayout::window().full().pack(),
+                    UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.15)),
+                    Sprite {
+                        image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
+                        image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                        ..default()
+                    },
+                )).with_children(|ui| {
+        
+                    // Spawn the text
+                    ui.spawn((
+                        UiLayout::window().pos((Rh(40.0), Rl(50.0))).anchor(Anchor::CenterLeft).pack(),
+                        UiColor::from(Color::BEVYPUNK_RED),
+                        UiTextSize::from(Rh(60.0)),
+                        Text2d::new("CONTINUE"),
+                        TextFont {
+                            font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
+                            font_size: 50.0,
+                            ..default()
+                        },
+                    ));
+                });
+            }); */
+
         });
 
     });
