@@ -3,7 +3,7 @@ use bevy::utils::HashMap;
 use bevy::core_pipeline::bloom::Bloom;
 use bevy_embedded_assets::*;
 
-pub(crate) use bevy::prelude::*;
+pub(crate) use bevy::{prelude::*, sprite::Anchor};
 pub(crate) use bevy_kira_audio::prelude::*;
 pub(crate) use bevy_lunex::*;
 pub(crate) use vleue_kinetoscope::*;
@@ -98,7 +98,7 @@ fn spawn_intro(mut commands: Commands, asset_server: Res<AssetServer>, priority_
 
         // Start the intro together with music
         ui.spawn((
-            UiLayout::window(),
+            UiLayout::window().full().pack(),
             Movie::play(priority_assets.video.get("intro").unwrap().clone(), asset_server.load("audio/intro.ogg")).playback(MoviePlayback::Stop)
 
         // Add observer that will change the state once the movie ends
@@ -120,9 +120,33 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
         // Spawn the background
         ui.spawn((
-            UiLayout::window(),
-            Dimension::from((1280.0, 720.0)),
+            UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
             Sprite::from_image(asset_server.load("images/ui/background.png")),
         ));
+
+        // Add the panel boundary
+        ui.spawn((
+            UiLayout::solid().size((881.0, 1600.0)).align_x(-0.74).pack(),
+        )).with_children(|ui| {
+
+            // Spawn the panel
+            ui.spawn((
+                UiLayout::window().x(Rl(50.0)).anchor(Anchor::TopCenter).size(Rl(105.0)).pack(),
+                Sprite::from_image(asset_server.load("images/ui/panel_menu.png")),
+            ));
+
+            // Spawn the logo boundary
+            ui.spawn((
+                UiLayout::window().y(Rl(11.0)).size(Rl((105.0, 20.0))).pack(),
+            )).with_children(|ui| {
+
+                // Spawn the logo
+                ui.spawn((
+                    UiLayout::solid().size((1240.0, 381.0)).pack(),
+                    Sprite::from_image(asset_server.load("images/ui/title.png")),
+                ));
+            });
+        });
+
     });
 }
