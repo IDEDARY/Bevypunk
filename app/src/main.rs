@@ -212,10 +212,10 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio
                                     ..default()
                                 },
                             ));
+                        });
 
-                        // Enable the transition on hover
-                        }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
-                    });
+                    // Enable the transition on hover
+                    }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
 
                     offset += gap + size;
                 }
