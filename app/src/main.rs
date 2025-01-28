@@ -47,7 +47,7 @@ fn main() -> AppExit {
     // Bundle all game assets into the binary and add general plugins
     app.add_plugins(EmbeddedAssetPlugin { mode: PluginMode::ReplaceDefault });
     app.add_plugins((DefaultPlugins, AnimatedImagePlugin, AudioPlugin, UiLunexPlugin));
-    //app.add_plugins(UiLunexDebugPlugin);
+    //app.add_plugins(UiLunexDebugPlugin::new());
 
     // Set the correct app state
     if !args.skip_intro {
@@ -201,6 +201,7 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio
                                     (UiBase::id(), Color::BEVYPUNK_RED),
                                     (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
                                 ]),
+                                UiHover::new().forward_speed(20.0).backward_speed(4.0),
                                 // You can control the size of the text
                                 UiTextSize::from(Rh(60.0)),
                                 // You can attach text like this
@@ -213,11 +214,7 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio
                             ));
 
                         // Enable the transition on hover
-                        }).observe(|trigger: Trigger<Pointer<Over>>, mut query: Query<&mut UiHover>| {
-                            query.get_mut(trigger.entity()).unwrap().enable = true;
-                        }).observe(|trigger: Trigger<Pointer<Out>>, mut query: Query<&mut UiHover>| {
-                            query.get_mut(trigger.entity()).unwrap().enable = false;
-                        });
+                        }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
                     });
 
                     offset += gap + size;
