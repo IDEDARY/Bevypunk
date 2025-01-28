@@ -36,8 +36,6 @@ enum AppState {
     IntroMovie,
     /// The game main menu
     MainMenu,
-    // /// The game loading screen
-    // LoadingScreen,
 }
 
 fn main() -> AppExit {
@@ -112,15 +110,20 @@ fn spawn_intro(mut commands: Commands, asset_server: Res<AssetServer>, priority_
     });
 }
 
-fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
+    // Start playing the music
+    audio.play(asset_server.load("audio/main_menu.ogg")).looped();
+
     // Create UI
     commands.spawn((
         UiLayoutRoot,
+        // Make the UI synchronized with camera viewport size
         UiFetchFromCamera::<0>,
     )).with_children(|ui| {
 
         // Spawn the background
         ui.spawn((
+            // You can name your entites for easier debug
             Name::new("Background"),
             UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
             Sprite::from_image(asset_server.load("images/ui/background.png")),
@@ -170,20 +173,37 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
                         // Spawn the image
                         ui.spawn((
-                            UiLayout::window().full().pack(),
-                            UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.15)),
+                            // You can define layouts for multiple states
+                            UiLayout::new(vec![
+                                (UiBase::id(), UiLayout::window().full()),
+                                (UiHover::id(), UiLayout::window().x(Rl(10.0)).full())
+                            ]),
+                            // Like this you can enable a state
+                            UiHover::new().forward_speed(20.0).backward_speed(4.0),
+                            // You can specify colors for multiple states
+                            UiColor::new(vec![
+                                (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.15)),
+                                (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                            ]),
                             Sprite {
                                 image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
+                                // Here we enable sprite slicing
                                 image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
                                 ..default()
                             },
                         )).with_children(|ui| {
-                
+
                             // Spawn the text
                             ui.spawn((
+                                // For text always use window layout to position it
                                 UiLayout::window().pos((Rh(40.0), Rl(50.0))).anchor(Anchor::CenterLeft).pack(),
-                                UiColor::from(Color::BEVYPUNK_RED),
+                                UiColor::new(vec![
+                                    (UiBase::id(), Color::BEVYPUNK_RED),
+                                    (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                                ]),
+                                // You can control the size of the text
                                 UiTextSize::from(Rh(60.0)),
+                                // You can attach text like this
                                 Text2d::new(button.to_ascii_uppercase()),
                                 TextFont {
                                     font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
@@ -191,48 +211,18 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                     ..default()
                                 },
                             ));
+
+                        // Enable the transition on hover
+                        }).observe(|trigger: Trigger<Pointer<Over>>, mut query: Query<&mut UiHover>| {
+                            query.get_mut(trigger.entity()).unwrap().enable = true;
+                        }).observe(|trigger: Trigger<Pointer<Out>>, mut query: Query<&mut UiHover>| {
+                            query.get_mut(trigger.entity()).unwrap().enable = false;
                         });
                     });
 
                     offset += gap + size;
                 }
-
             });
-
-
-            /* // Spawn the button
-            ui.spawn((
-                Name::new("CONTINUE"),
-                UiLayout::window().x(Rl(20.0)).y(Rl(56.0)).size(Rl((62.0, 6.5))).pack(),
-            )).with_children(|ui| {
-
-                // Spawn the image
-                ui.spawn((
-                    UiLayout::window().full().pack(),
-                    UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.15)),
-                    Sprite {
-                        image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
-                        image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
-                        ..default()
-                    },
-                )).with_children(|ui| {
-        
-                    // Spawn the text
-                    ui.spawn((
-                        UiLayout::window().pos((Rh(40.0), Rl(50.0))).anchor(Anchor::CenterLeft).pack(),
-                        UiColor::from(Color::BEVYPUNK_RED),
-                        UiTextSize::from(Rh(60.0)),
-                        Text2d::new("CONTINUE"),
-                        TextFont {
-                            font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
-                            font_size: 50.0,
-                            ..default()
-                        },
-                    ));
-                });
-            }); */
-
         });
-
     });
 }
