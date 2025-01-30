@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use clap::Parser;
 use bevy::utils::HashMap;
 use bevy::core_pipeline::bloom::Bloom;
@@ -47,7 +49,8 @@ fn main() -> AppExit {
     // Bundle all game assets into the binary and add general plugins
     app.add_plugins(EmbeddedAssetPlugin { mode: PluginMode::ReplaceDefault });
     app.add_plugins((DefaultPlugins, AnimatedImagePlugin, AudioPlugin, UiLunexPlugin));
-    //app.add_plugins(UiLunexDebugPlugin::new());
+    app.add_plugins(UiLunexDebugPlugin::new());
+    app.insert_resource(PointerInputPlugin { is_mouse_enabled: false, is_touch_enabled: false });
 
     // Set the correct app state
     if !args.skip_intro {
@@ -83,9 +86,156 @@ fn main() -> AppExit {
 // #======================#
 // #=== THE GAME LOGIC ===#
 
-fn spawn_camera(mut commands: Commands) {
+fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atlas_layout: ResMut<Assets<TextureAtlasLayout>>) {
     // Spawn the camera
-    commands.spawn((Camera2d, Camera { hdr: true, ..default() }, Bloom::OLD_SCHOOL, VFXBloomFlicker, UiSourceCamera::<0>));
+    commands.spawn((
+        Camera2d, Camera { hdr: true, ..default() }, Bloom::OLD_SCHOOL, VFXBloomFlicker, UiSourceCamera::<0>, Transform::from_translation(Vec3::Z * 1000.0),
+    )).with_children(|cam| {
+
+        // Spawn cursor
+        cam.spawn ((
+            Cursor2d::new()
+                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
+                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
+                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
+
+            // Change the scale
+            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
+
+            // Change the sprite
+            Sprite {
+                image: asset_server.load("images/ui/cursor.png"),
+                texture_atlas: Some(TextureAtlas {
+                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
+                    index: 0,
+                }),
+                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
+                anchor: Anchor::TopLeft,
+                ..default()
+            },
+        ));
+/*
+        // Spawn cursor
+        cam.spawn ((
+            Cursor2d::new()
+                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
+                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
+                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
+
+            // Change the scale
+            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
+
+            // Change the sprite
+            Sprite {
+                image: asset_server.load("images/ui/cursor.png"),
+                texture_atlas: Some(TextureAtlas {
+                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
+                    index: 0,
+                }),
+                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
+                anchor: Anchor::TopLeft,
+                ..default()
+            },
+            GamepadCursor::new(),
+        ));
+
+        // Spawn cursor
+        cam.spawn ((
+            Cursor2d::new()
+                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
+                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
+                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
+
+            // Change the scale
+            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
+
+            // Change the sprite
+            Sprite {
+                image: asset_server.load("images/ui/cursor.png"),
+                texture_atlas: Some(TextureAtlas {
+                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
+                    index: 0,
+                }),
+                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
+                anchor: Anchor::TopLeft,
+                ..default()
+            },
+            GamepadCursor::new(),
+        ));
+
+        // Spawn cursor
+        cam.spawn ((
+            Cursor2d::new()
+                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
+                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
+                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
+
+            // Change the scale
+            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
+
+            // Change the sprite
+            Sprite {
+                image: asset_server.load("images/ui/cursor.png"),
+                texture_atlas: Some(TextureAtlas {
+                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
+                    index: 0,
+                }),
+                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
+                anchor: Anchor::TopLeft,
+                ..default()
+            },
+            GamepadCursor::new(),
+        ));
+
+        // Spawn cursor
+        cam.spawn ((
+            Cursor2d::new()
+                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
+                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
+                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
+
+            // Change the scale
+            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
+
+            // Change the sprite
+            Sprite {
+                image: asset_server.load("images/ui/cursor.png"),
+                texture_atlas: Some(TextureAtlas {
+                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
+                    index: 0,
+                }),
+                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
+                anchor: Anchor::TopLeft,
+                ..default()
+            },
+            GamepadCursor::new(),
+        ));
+
+        // Spawn cursor
+        cam.spawn ((
+            Cursor2d::new()
+                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
+                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
+                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
+
+            // Change the scale
+            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
+
+            // Change the sprite
+            Sprite {
+                image: asset_server.load("images/ui/cursor.png"),
+                texture_atlas: Some(TextureAtlas {
+                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
+                    index: 0,
+                }),
+                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
+                anchor: Anchor::TopLeft,
+                ..default()
+            },
+            GamepadCursor::new(),
+        ));
+ */
+    });
 }
 
 fn spawn_intro(mut commands: Commands, asset_server: Res<AssetServer>, priority_assets: Res<PriorityAssets>) {
@@ -97,7 +247,7 @@ fn spawn_intro(mut commands: Commands, asset_server: Res<AssetServer>, priority_
 
         // Start the intro together with music
         ui.spawn((
-            UiLayout::window().full().pack(),
+            UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
             Movie::play(priority_assets.video.get("intro").unwrap().clone(), asset_server.load("audio/intro.ogg")).playback(MoviePlayback::Stop)
 
         // Add observer that will change the state once the movie ends
@@ -112,7 +262,7 @@ fn spawn_intro(mut commands: Commands, asset_server: Res<AssetServer>, priority_
 
 fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
     // Start playing the music
-    audio.play(asset_server.load("audio/main_menu.ogg")).looped();
+    audio.play(asset_server.load("audio/main_menu.ogg")).looped().fade_in(AudioTween::new(Duration::new(2, 0), AudioEasing::OutPowf(2.0)));
 
     // Create UI
     commands.spawn((
@@ -169,8 +319,8 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio
                     ui.spawn((
                         Name::new(button),
                         UiLayout::window().y(Rl(offset)).size(Rl((100.0, size))).pack(),
+                        PointerEventCounter::<UiHover>::default(),
                     )).with_children(|ui| {
-
                         // Spawn the image
                         ui.spawn((
                             // You can define layouts for multiple states
@@ -191,6 +341,8 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio
                                 image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
                                 ..default()
                             },
+                            // Make sure it does not cover the bounding zone of parent
+                            PickingBehavior::IGNORE,
                         )).with_children(|ui| {
 
                             // Spawn the text
@@ -211,6 +363,8 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio
                                     font_size: 64.0,
                                     ..default()
                                 },
+                                // Make sure it does not cover the bounding zone of parent
+                                PickingBehavior::IGNORE,
                             ));
                         });
 
