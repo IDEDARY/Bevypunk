@@ -319,7 +319,6 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio
                     ui.spawn((
                         Name::new(button),
                         UiLayout::window().y(Rl(offset)).size(Rl((100.0, size))).pack(),
-                        PointerEventCounter::<UiHover>::default(),
                     )).with_children(|ui| {
                         // Spawn the image
                         ui.spawn((
