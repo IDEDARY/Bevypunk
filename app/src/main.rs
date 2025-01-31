@@ -49,7 +49,7 @@ fn main() -> AppExit {
     // Bundle all game assets into the binary and add general plugins
     app.add_plugins(EmbeddedAssetPlugin { mode: PluginMode::ReplaceDefault });
     app.add_plugins((DefaultPlugins, AnimatedImagePlugin, AudioPlugin, UiLunexPlugin));
-    app.add_plugins(UiLunexDebugPlugin::new());
+    //app.add_plugins(UiLunexDebugPlugin::new());
     app.insert_resource(PointerInputPlugin { is_mouse_enabled: false, is_touch_enabled: false });
 
     // Set the correct app state
@@ -70,6 +70,7 @@ fn main() -> AppExit {
     }
 
     app.insert_resource(priority_assets);
+    app.add_systems(PreStartup, preload);
 
     // _________________________________
     // ----- START THE APPLICATION -----
@@ -85,6 +86,22 @@ fn main() -> AppExit {
 
 // #======================#
 // #=== THE GAME LOGIC ===#
+
+/// This struct can be spawned to hold handles you wish not
+/// to deallocate when all entities are despawned which use them.
+#[derive(Component)]
+struct AssetLock {
+    #[allow(dead_code)]
+    assets: Vec<UntypedHandle>,
+}
+
+fn preload(mut commands: Commands, asset_server: Res<AssetServer>) {
+
+    commands.spawn(AssetLock { assets: vec![
+        asset_server.load_folder("fonts").untyped(),
+        asset_server.load_folder("images/ui").untyped()
+    ]});
+}
 
 fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atlas_layout: ResMut<Assets<TextureAtlasLayout>>) {
     // Spawn the camera
