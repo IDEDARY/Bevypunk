@@ -25,11 +25,11 @@ impl VFXBloomFlicker {
     /// System for immitating flickering by randomly adjusting camera's bloom values
     fn system(mut query: Query<&mut Bloom, With<VFXBloomFlicker>>) {
         for mut bloom in &mut query {
-            let mut rng = rand::thread_rng();
-            if rng.gen_range(0..100) < 20 {
+            let mut rng = rand::rng();
+            if rng.random_range(0..100) < 20 {
                 // This formula will make the value jumping smooth and natural, like neon flicker
-                bloom.intensity += (rng.gen_range(0.20..0.30)-bloom.intensity)/6.0;
-                bloom.prefilter.threshold += (rng.gen_range(0.20..0.30)-bloom.prefilter.threshold)/4.0;
+                bloom.intensity += (rng.random_range(0.20..0.30)-bloom.intensity)/6.0;
+                bloom.prefilter.threshold += (rng.random_range(0.20..0.30)-bloom.prefilter.threshold)/4.0;
             }
         }
     }

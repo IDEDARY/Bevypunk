@@ -1,16 +1,16 @@
 use std::time::Duration;
 
 use clap::Parser;
-use bevy::utils::HashMap;
 use bevy::core_pipeline::bloom::Bloom;
-use bevy_embedded_assets::*;
 
 pub(crate) use bevy::{prelude::*, sprite::Anchor};
 pub(crate) use bevy_kira_audio::prelude::*;
 pub(crate) use bevy_lunex::*;
 pub(crate) use vleue_kinetoscope::*;
 
+pub(crate) use game_loading::*;
 pub(crate) use game_movies::*;
+pub(crate) use game_preferences::*;
 pub(crate) use game_vfx::*;
 
 
@@ -25,12 +25,6 @@ struct Args {
     skip_intro: bool,
 }
 
-/// Priority assets loaded before the game start
-#[derive(Resource, Default)]
-pub struct PriorityAssets {
-    video: HashMap<String, Handle<AnimatedImage>>,
-}
-
 /// Different app states for the Bevypunk game
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 enum AppState {
@@ -41,26 +35,22 @@ enum AppState {
 }
 
 fn main() -> AppExit {
-    // ____________________________________
+
     // ----- NEW APPLICATION INSTANCE -----
+
     let mut app = App::new();
     let args = Args::parse();
 
-    // Bundle all game assets into the binary and add general plugins
-    app.add_plugins(EmbeddedAssetPlugin { mode: PluginMode::ReplaceDefault });
-    app.add_plugins((DefaultPlugins, AnimatedImagePlugin, AudioPlugin, UiLunexPlugin));
+    // Add all Bevy plugins
+    app.add_plugins(BevyPlugins);
     //app.add_plugins(UiLunexDebugPlugin::new());
-    app.insert_resource(PointerInputPlugin { is_mouse_enabled: false, is_touch_enabled: false });
 
     // Set the correct app state
-    if !args.skip_intro {
-        app.insert_state(AppState::IntroMovie);
-    } else {
-        app.insert_state(AppState::MainMenu);
-    }
+    app.insert_state(if args.skip_intro { AppState::MainMenu } else { AppState::IntroMovie });
 
-    // ___________________________________
+
     // ----- PRIORITY ASSET LOADING  -----
+
     let mut priority_assets = PriorityAssets::default();
 
     // Load the game intro if required
@@ -72,8 +62,9 @@ fn main() -> AppExit {
     app.insert_resource(priority_assets);
     app.add_systems(PreStartup, preload);
 
-    // _________________________________
+
     // ----- START THE APPLICATION -----
+
     app.add_systems(Startup, spawn_camera);
     app.add_systems(OnEnter(AppState::IntroMovie), spawn_intro);
     app.add_systems(OnEnter(AppState::MainMenu), spawn_main_menu);
@@ -87,20 +78,18 @@ fn main() -> AppExit {
 // #======================#
 // #=== THE GAME LOGIC ===#
 
-/// This struct can be spawned to hold handles you wish not
-/// to deallocate when all entities are despawned which use them.
-#[derive(Component)]
-struct AssetLock {
-    #[allow(dead_code)]
-    assets: Vec<UntypedHandle>,
-}
-
 fn preload(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn(AssetLock { assets: vec![
         asset_server.load_folder("fonts").untyped(),
         asset_server.load_folder("images/ui").untyped()
     ]});
+
+    commands.spawn(AssetLock { assets: vec![
+        asset_server.load::<AudioSource>("audio/intro.ogg").untyped(),
+        asset_server.load::<AudioSource>("audio/main_menu.ogg").untyped(),
+    ]});
+
 }
 
 fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atlas_layout: ResMut<Assets<TextureAtlasLayout>>) {

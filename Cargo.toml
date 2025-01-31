@@ -37,7 +37,9 @@
 [workspace.dependencies]
 
   # GAME CRATES
+  game_loading = { path = "crates/game_loading" }
   game_movies = { path = "crates/game_movies" }
+  game_preferences = { path = "crates/game_preferences" }
   game_vfx = { path = "crates/game_vfx" }
 
   #===========================#
@@ -91,11 +93,11 @@
   bevy_lunex = { path = "../bevy_lunex/crate"}
 
   # PHYSICS
-  avian3d = { version = "^0.2.0" }
+  avian3d = { version = "^0.2.1" }
 
   #===========================#
   #=== RUST MISCELLANEOUS === #
 
   # OTHER
-  rand = "^0.8.5"
+  rand = "^0.9.0"
   clap = { version = "^4.5.27", features = ["derive"] }
