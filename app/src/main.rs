@@ -32,6 +32,8 @@ enum AppState {
     IntroMovie,
     /// The game main menu
     MainMenu,
+    /// The game main menu
+    Settings,
 }
 
 fn main() -> AppExit {
@@ -66,8 +68,9 @@ fn main() -> AppExit {
     // ----- START THE APPLICATION -----
 
     app.add_systems(Startup, spawn_camera);
-    app.add_systems(OnEnter(AppState::IntroMovie), spawn_intro);
-    app.add_systems(OnEnter(AppState::MainMenu), spawn_main_menu);
+    app.add_systems(OnEnter(AppState::IntroMovie), IntroScene::spawn).add_systems(OnExit(AppState::IntroMovie), despawn_scene::<IntroScene>);
+    app.add_systems(OnEnter(AppState::MainMenu), MainMenuScene::spawn).add_systems(OnExit(AppState::MainMenu), despawn_scene::<MainMenuScene>);
+    app.add_systems(OnEnter(AppState::Settings), SettingsScene::spawn).add_systems(OnExit(AppState::Settings), despawn_scene::<SettingsScene>);
 
     app.add_plugins((VFXPlugin, MoviePlugin));
 
@@ -78,20 +81,21 @@ fn main() -> AppExit {
 // #======================#
 // #=== THE GAME LOGIC ===#
 
+/// This system is run in PreStartup. It locks some assets from being freed when not used.
 fn preload(mut commands: Commands, asset_server: Res<AssetServer>) {
-
+    // Spawn an entity with these assets, so that Bevy does not unload these assets when nobody is using them
     commands.spawn(AssetLock { assets: vec![
         asset_server.load_folder("fonts").untyped(),
         asset_server.load_folder("images/ui").untyped()
     ]});
-
+    // This is good to reduce poping-in of important assets, such as UI, fonts, etc.
     commands.spawn(AssetLock { assets: vec![
         asset_server.load::<AudioSource>("audio/intro.ogg").untyped(),
         asset_server.load::<AudioSource>("audio/main_menu.ogg").untyped(),
     ]});
-
 }
 
+/// This system spawns & setups the basic camera with cursor
 fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atlas_layout: ResMut<Assets<TextureAtlasLayout>>) {
     // Spawn the camera
     commands.spawn((
@@ -99,7 +103,7 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
     )).with_children(|cam| {
 
         // Spawn cursor
-        cam.spawn ((
+        /* cam.spawn ((
             Cursor2d::new()
                 .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
                 .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
@@ -119,7 +123,7 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
                 anchor: Anchor::TopLeft,
                 ..default()
             },
-        ));
+        )); */
 /*
         // Spawn cursor
         cam.spawn ((
@@ -244,141 +248,295 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
     });
 }
 
-fn spawn_intro(mut commands: Commands, asset_server: Res<AssetServer>, priority_assets: Res<PriorityAssets>) {
-    // Create UI
-    commands.spawn((
-        UiLayoutRoot,
-        UiFetchFromCamera::<0>,
-    )).with_children(|ui| {
-
-        // Start the intro together with music
-        ui.spawn((
-            UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
-            Movie::play(priority_assets.video.get("intro").unwrap().clone(), asset_server.load("audio/intro.ogg")).playback(MoviePlayback::Stop)
-
-        // Add observer that will change the state once the movie ends
-        )).observe(|_: Trigger<MovieEnded>, mut next: ResMut<NextState<AppState>>, mut commands: Commands, ui: Single<Entity, With<UiLayoutRoot>>| {
-
-            // Despawn the UI and change the state
-            commands.entity(*ui).despawn_recursive();
-            next.set(AppState::MainMenu);
-        });
-    });
+/// This is a generic system that will despawn all entities with attached component S.
+fn despawn_scene<S: Component>(mut commands: Commands, query: Query<Entity, With<S>>) {
+    for entity in &query {
+        commands.entity(entity).despawn_recursive();
+    }
 }
 
-fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
-    // Start playing the music
-    audio.play(asset_server.load("audio/main_menu.ogg")).looped().fade_in(AudioTween::new(Duration::new(2, 0), AudioEasing::OutPowf(2.0)));
 
-    // Create UI
-    commands.spawn((
-        UiLayoutRoot,
-        // Make the UI synchronized with camera viewport size
-        UiFetchFromCamera::<0>,
-    )).with_children(|ui| {
-
-        // Spawn the background
-        ui.spawn((
-            // You can name your entites for easier debug
-            Name::new("Background"),
-            UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
-            Sprite::from_image(asset_server.load("images/ui/background.png")),
-        ));
-
-        // Add the panel boundary
-        ui.spawn((
-            UiLayout::solid().size((881.0, 1600.0)).align_x(-0.74).pack(),
+#[derive(Component)]
+struct IntroScene;
+impl IntroScene {
+    fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, priority_assets: Res<PriorityAssets>) {
+        // Create UI
+        commands.spawn((
+            UiLayoutRoot,
+            // Make the UI synchronized with camera viewport size
+            UiFetchFromCamera::<0>,
+            // A scene marker for later mass scene despawn, not UI related
+            IntroScene
         )).with_children(|ui| {
-
-            // Spawn the panel
+    
+            // Start the intro together with music
             ui.spawn((
-                Name::new("Panel"),
-                UiLayout::window().x(Rl(50.0)).anchor(Anchor::TopCenter).size(Rl(105.0)).pack(),
-                Sprite::from_image(asset_server.load("images/ui/panel_menu.png")),
-            ));
-
-            // Spawn the logo boundary
-            ui.spawn((
-                UiLayout::window().y(Rl(11.0)).size(Rl((105.0, 20.0))).pack(),
-            )).with_children(|ui| {
-
-                // Spawn the logo
-                ui.spawn((
-                    Name::new("Logo"),
-                    UiLayout::solid().size((1240.0, 381.0)).pack(),
-                    Sprite::from_image(asset_server.load("images/ui/title.png")),
-                ));
+                UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
+                Movie::play(priority_assets.video.get("intro").unwrap().clone(), asset_server.load("audio/intro.ogg")).playback(MoviePlayback::Stop)
+    
+            // Add observer that will change the state once the movie ends
+            )).observe(|_: Trigger<MovieEnded>, mut next: ResMut<NextState<AppState>>| {
+                next.set(AppState::MainMenu);
             });
+        });
+    }
+}
 
-            // Spawn button boundary
+
+#[derive(Component)]
+struct MainMenuScene;
+impl MainMenuScene {
+    fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
+        // Start playing the music
+        audio.play(asset_server.load("audio/main_menu.ogg")).looped().fade_in(AudioTween::new(Duration::new(2, 0), AudioEasing::OutPowf(2.0)));
+    
+        // Create UI
+        commands.spawn((
+            UiLayoutRoot,
+            // Make the UI synchronized with camera viewport size
+            UiFetchFromCamera::<0>,
+            // A scene marker for later mass scene despawn, not UI related
+            MainMenuScene
+        )).with_children(|ui| {
+    
+            // Spawn the background
             ui.spawn((
-                UiLayout::window().pos(Rl((22.0, 33.0))).size(Rl((55.0, 34.0))).pack(),
+                // You can name your entites for easier debug
+                Name::new("Background"),
+                UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
+                Sprite::from_image(asset_server.load("images/ui/background.png")),
+            ));
+    
+            // Add the panel boundary
+            ui.spawn((
+                UiLayout::solid().size((881.0, 1600.0)).align_x(-0.74).pack(),
             )).with_children(|ui| {
-
-                // Spawn buttons
-                let gap = 3.0;
-                let size = 14.0;
-                let mut offset = 0.0;
-                for button in ["Continue", "New Game", "Load Game", "Settings", "Additional Content", "Credits", "Quit Game"] {
-
-                    // Spawn the button
+    
+                // Spawn the panel
+                ui.spawn((
+                    Name::new("Panel"),
+                    UiLayout::window().x(Rl(50.0)).anchor(Anchor::TopCenter).size(Rl(105.0)).pack(),
+                    Sprite::from_image(asset_server.load("images/ui/panel_menu.png")),
+                ));
+    
+                // Spawn the logo boundary
+                ui.spawn((
+                    UiLayout::window().y(Rl(11.0)).size(Rl((105.0, 20.0))).pack(),
+                )).with_children(|ui| {
+    
+                    // Spawn the logo
                     ui.spawn((
-                        Name::new(button),
-                        UiLayout::window().y(Rl(offset)).size(Rl((100.0, size))).pack(),
-                    )).with_children(|ui| {
-                        // Spawn the image
-                        ui.spawn((
-                            // You can define layouts for multiple states
-                            UiLayout::new(vec![
-                                (UiBase::id(), UiLayout::window().full()),
-                                (UiHover::id(), UiLayout::window().x(Rl(10.0)).full())
-                            ]),
-                            // Like this you can enable a state
-                            UiHover::new().forward_speed(20.0).backward_speed(4.0),
-                            // You can specify colors for multiple states
-                            UiColor::new(vec![
-                                (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.15)),
-                                (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
-                            ]),
-                            Sprite {
-                                image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
-                                // Here we enable sprite slicing
-                                image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
-                                ..default()
-                            },
-                            // Make sure it does not cover the bounding zone of parent
-                            PickingBehavior::IGNORE,
-                        )).with_children(|ui| {
-
-                            // Spawn the text
+                        Name::new("Logo"),
+                        UiLayout::solid().size((1240.0, 381.0)).pack(),
+                        Sprite::from_image(asset_server.load("images/ui/title.png")),
+                    ));
+                });
+    
+                // Spawn button boundary
+                ui.spawn((
+                    UiLayout::window().pos(Rl((22.0, 33.0))).size(Rl((55.0, 34.0))).pack(),
+                )).with_children(|ui| {
+    
+                    // Spawn buttons
+                    let gap = 3.0;
+                    let size = 14.0;
+                    let mut offset = 0.0;
+                    for button in ["Continue", "New Game", "Load Game", "Settings", "Additional Content", "Credits", "Quit Game"] {
+    
+                        // Spawn the button
+                        let mut button_entity = ui.spawn((
+                            Name::new(button),
+                            UiLayout::window().y(Rl(offset)).size(Rl((100.0, size))).pack(),
+                        ));
+                        button_entity.with_children(|ui| {
+                            // Spawn the image
                             ui.spawn((
-                                // For text always use window layout to position it
-                                UiLayout::window().pos((Rh(40.0), Rl(50.0))).anchor(Anchor::CenterLeft).pack(),
+                                // You can define layouts for multiple states
+                                UiLayout::new(vec![
+                                    (UiBase::id(), UiLayout::window().full()),
+                                    (UiHover::id(), UiLayout::window().x(Rl(10.0)).full())
+                                ]),
+                                // Like this you can enable a state
+                                UiHover::new().forward_speed(20.0).backward_speed(4.0),
+                                // You can specify colors for multiple states
                                 UiColor::new(vec![
-                                    (UiBase::id(), Color::BEVYPUNK_RED),
+                                    (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.15)),
                                     (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
                                 ]),
-                                UiHover::new().forward_speed(20.0).backward_speed(4.0),
-                                // You can control the size of the text
-                                UiTextSize::from(Rh(60.0)),
-                                // You can attach text like this
-                                Text2d::new(button.to_ascii_uppercase()),
-                                TextFont {
-                                    font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
-                                    font_size: 64.0,
+                                Sprite {
+                                    image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
+                                    // Here we enable sprite slicing
+                                    image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
                                     ..default()
                                 },
                                 // Make sure it does not cover the bounding zone of parent
                                 PickingBehavior::IGNORE,
-                            ));
-                        });
-
-                    // Enable the transition on hover
-                    }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
-
-                    offset += gap + size;
-                }
+                            )).with_children(|ui| {
+    
+                                // Spawn the text
+                                ui.spawn((
+                                    // For text always use window layout to position it
+                                    UiLayout::window().pos((Rh(40.0), Rl(50.0))).anchor(Anchor::CenterLeft).pack(),
+                                    UiColor::new(vec![
+                                        (UiBase::id(), Color::BEVYPUNK_RED),
+                                        (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                                    ]),
+                                    UiHover::new().forward_speed(20.0).backward_speed(4.0),
+                                    // You can control the size of the text
+                                    UiTextSize::from(Rh(60.0)),
+                                    // You can attach text like this
+                                    Text2d::new(button.to_ascii_uppercase()),
+                                    TextFont {
+                                        font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
+                                        font_size: 64.0,
+                                        ..default()
+                                    },
+                                    // Make sure it does not cover the bounding zone of parent
+                                    PickingBehavior::IGNORE,
+                                ));
+                            });
+    
+                        // Enable the transition on hover
+                        }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
+    
+                        match button {
+                            "Settings" => {
+                                button_entity.observe(|_: Trigger<Pointer<Click>>, mut next: ResMut<NextState<AppState>>| {
+                                    // Change the state to settings
+                                    next.set(AppState::Settings);
+                                });
+                            },
+                            "Quit Game" => {},
+                            _ => {
+                                button_entity.observe(|c_trigger: Trigger<Pointer<Click>>, c_button: Query<NameOrEntity, With<UiLayout>>| {
+                                    info!("Clicked: {}", c_button.get(c_trigger.entity()).unwrap());
+                                });
+                            }
+                        }
+                        
+                        offset += gap + size;
+                    }
+                });
             });
         });
-    });
+    }
+}
+
+
+#[derive(Component)]
+struct SettingsScene;
+impl SettingsScene {
+    fn spawn(mut commands: Commands, asset_server: Res<AssetServer>) {
+        // Create UI
+        commands.spawn((
+            UiLayoutRoot,
+            // Make the UI synchronized with camera viewport size
+            UiFetchFromCamera::<0>,
+            // A scene marker for later mass scene despawn, not UI related
+            SettingsScene
+        )).with_children(|ui| {
+    
+            // Spawn the background
+            ui.spawn((
+                Name::new("Background"),
+                UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
+                Sprite::from_image(asset_server.load("images/ui/background.png")),
+            ));
+    
+            // Spawn the settings content
+            ui.spawn((
+                UiLayout::solid().size((3.0, 3.0)).align_y(-1.0).pack(),
+            )).with_children(|ui| {
+    
+                // Spawn the tab bar
+                ui.spawn((
+                    UiLayout::window().size(Rl((100.0, 10.0))).pack(),
+                )).with_children(|ui| {
+    
+                    // Spawn left chevron
+                    ui.spawn((
+                        Name::new("Chevron Left"),
+                        UiLayout::window().pos(Rl((5.0, 50.0))).anchor(Anchor::Center).size(Rh(35.0)).pack(),
+                        Sprite::from_image(asset_server.load("images/ui/components/chevron_left.png")),
+                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                        UiColor::new(vec![
+                            (UiBase::id(), Color::BEVYPUNK_BLUE),
+                            (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                        ]),
+                    )).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
+    
+                    // Spawn right chevron
+                    ui.spawn((
+                        Name::new("Chevron Right"),
+                        UiLayout::window().pos(Rl((95.0, 50.0))).anchor(Anchor::Center).size(Rh(35.0)).pack(),
+                        Sprite::from_image(asset_server.load("images/ui/components/chevron_right.png")),
+                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                        UiColor::new(vec![
+                            (UiBase::id(), Color::BEVYPUNK_BLUE),
+                            (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                        ]),
+                    )).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
+    
+                    // Spawn the control bar
+                    ui.spawn((
+                        UiLayout::window().x(Rl(10.0)).size(Rl((80.0, 100.0))).pack(),
+                    )).with_children(|ui| {
+                        
+                        let categories = ["Controls", "Sound", "Graphics", "Window"];
+                        let pos = 100.0 / categories.len() as f32;
+                        for (i, category) in categories.into_iter().enumerate() {
+    
+                            // Spawn the button
+                            ui.spawn((
+                                Name::new(category),
+                                UiLayout::window().x(Rl(pos * i as f32)).size(Rl((pos, 100.0))).pack(),
+                            )).with_children(|ui| {
+                                
+                                // Spawn the background
+                                ui.spawn((
+                                    UiLayout::window().full().y(Rl(10.0)).height(Rl(80.0)).pack(),
+                                    UiHover::new().forward_speed(20.0).backward_speed(1.0),
+                                    UiColor::new(vec![
+                                        (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.0)),
+                                        (UiHover::id(), Color::BEVYPUNK_RED.with_alpha(0.4))
+                                    ]),
+                                    Sprite {
+                                        image: asset_server.load("images/ui/components/button_symetric.png"),
+                                        image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                        ..default()
+                                    },
+                                    PickingBehavior::IGNORE,
+                                )).with_children(|ui| {
+    
+                                    // Spawn the text
+                                    ui.spawn((
+                                        UiLayout::window().pos(Rl(50.0)).anchor(Anchor::Center).pack(),
+                                        UiColor::new(vec![
+                                            (UiBase::id(), Color::BEVYPUNK_RED),
+                                            (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
+                                        ]),
+                                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.ceil()),
+                                        UiTextSize::from(Rh(50.0)),
+                                        Text2d::new(category.to_ascii_uppercase()),
+                                        TextFont {
+                                            font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
+                                            font_size: 64.0,
+                                            ..default()
+                                        },
+                                        PickingBehavior::IGNORE,
+                                    ));
+                                });
+                            
+                            // Add the observers
+                            }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
+                        }
+        
+                    });
+    
+                });
+    
+            });
+    
+        });
+    }
 }
