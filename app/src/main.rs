@@ -51,7 +51,7 @@ fn main() -> AppExit {
 
     // Add all Bevy plugins
     app.add_plugins(BevyPlugins);
-    //app.add_plugins(UiLunexDebugPlugin::new());
+    app.add_plugins(UiLunexDebugPlugin::new());
 
     // Set the correct app state
     app.insert_state(if args.skip_intro { AppState::MainMenu } else { AppState::IntroMovie });
@@ -447,7 +447,38 @@ impl MainMenuScene {
 #[derive(Component)]
 struct NewGameScene;
 impl NewGameScene {
-    fn spawn(mut commands: Commands, asset_server: Res<AssetServer>) {
+    fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, mut images: ResMut<Assets<Image>>) {
+        
+        // Create the transparent render texture
+        let image_handle = images.add(Image::clear_render_texture());
+        
+        // Create embedd camera that will render to the texture
+        commands.spawn((
+            Camera3d::default(), Camera::clear_render_to(image_handle.clone()).with_order(-1),
+            // A scene marker for later mass scene despawn, not UI related
+            NewGameScene
+        ));
+
+        // Spawn the model
+        commands.spawn((
+            SceneRoot(asset_server.load("models/person.glb#Scene0")),
+            Transform::from_xyz(-0.3, -1.5, -1.0),
+            // A scene marker for later mass scene despawn, not UI related
+            NewGameScene
+        ));
+
+        // Spawn point light
+        commands.spawn((
+            PointLight {
+                intensity: 10000.0,
+                shadows_enabled: false,
+                color: Color::BEVYPUNK_RED.with_luminance(1.6),
+                ..default()
+            },
+            // A scene marker for later mass scene despawn, not UI related
+            NewGameScene
+        ));
+        
         // Create UI
         commands.spawn((
             UiLayoutRoot,
@@ -462,7 +493,139 @@ impl NewGameScene {
                 Name::new("Background"),
                 UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
                 Sprite::from_image(asset_server.load("images/ui/background.png")),
+                UiDepth::Set(0.0),
             ));
+
+            // Spawn the background
+            ui.spawn((
+                Name::new("Camera"),
+                UiLayout::window().full().pack(),
+                Sprite::from_image(image_handle),
+                UiEmbedding,
+                PickingBehavior {
+                    should_block_lower: false,
+                    is_hoverable: true,
+                },
+            ));
+
+            // Spawn return button
+            ui.spawn((
+                Name::new("Return"),
+                UiLayout::window().pos(Rl((2.0, 4.0))).size(Rl((16.0, 8.0))).pack(),
+            )).with_children(|ui| {
+                // Spawn the image
+                ui.spawn((
+                    // You can define layouts for multiple states
+                    UiLayout::new(vec![
+                        (UiBase::id(), UiLayout::boundary().pos2(Rl(100.0)).wrap()),
+                        (UiHover::id(), UiLayout::boundary().pos2(Rl(100.0)).x2(Rl(115.0)).wrap())
+                    ]),
+                    // Like this you can enable a state
+                    UiHover::new().forward_speed(20.0).backward_speed(4.0),
+                    // You can specify colors for multiple states
+                    UiColor::new(vec![
+                        (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.15)),
+                        (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                    ]),
+                    Sprite {
+                        image: asset_server.load("images/ui/components/button_sliced_bottom_right.png"),
+                        // Here we enable sprite slicing
+                        image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                        ..default()
+                    },
+                    // Make sure it does not cover the bounding zone of parent
+                    PickingBehavior::IGNORE,
+                )).with_children(|ui| {
+
+                    // Spawn the text
+                    ui.spawn((
+                        // For text always use window layout to position it
+                        UiLayout::window().pos((Rh(40.0), Rl(50.0))).anchor(Anchor::CenterLeft).pack(),
+                        UiColor::new(vec![
+                            (UiBase::id(), Color::BEVYPUNK_RED),
+                            (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                        ]),
+                        UiHover::new().forward_speed(20.0).backward_speed(4.0),
+                        // You can control the size of the text
+                        UiTextSize::from(Rh(60.0)),
+                        // You can attach text like this
+                        Text2d::new("Return"),
+                        TextFont {
+                            font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
+                            font_size: 64.0,
+                            ..default()
+                        },
+                        // Make sure it does not cover the bounding zone of parent
+                        PickingBehavior::IGNORE,
+                    ));
+                });
+
+            // Enable the transition on hover
+            }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>)
+            .observe(|_: Trigger<Pointer<Click>>, mut next: ResMut<NextState<AppState>>| {
+                // Change the state to settings
+                next.set(AppState::MainMenu);
+            });
+
+            // Spawn panel boundary
+            ui.spawn((
+                UiLayout::solid().size((879.0, 1600.0)).align_x(0.74).pack(),
+            )).with_children(|ui| {
+                
+                ui.spawn((
+                    UiLayout::window().x(Rl(50.0)).anchor(Anchor::TopCenter).size(Rl(105.0)).pack(),
+                    Sprite::from(asset_server.load("images/ui/panel_full.png"))
+                )).with_children(|ui| {
+                    
+                    // Spawn the text
+                    ui.spawn((
+                        // For text always use window layout to position it
+                        UiLayout::window().pos(Rl((53., 8.))).anchor(Anchor::TopCenter).pack(),
+                        UiColor::from(Color::BEVYPUNK_RED),
+                        // You can control the size of the text
+                        UiTextSize::from(Rh(5.0)),
+                        // You can attach text like this
+                        Text2d::new("New Character"),
+                        TextFont {
+                            font: asset_server.load("fonts/rajdhani/Rajdhani-SemiBold.ttf"),
+                            font_size: 64.0,
+                            ..default()
+                        },
+                    ));
+
+                    // Spawn button boundary
+                    ui.spawn((
+                        Name::new("Button List"),
+                        UiLayout::window().pos(Rl((53.0, 15.0))).anchor(Anchor::TopCenter).size(Rl((60.0, 65.0))).pack(),
+                    )).with_children(|ui| {
+
+                        // Spawn buttons
+                        let gap = 5.0;
+                        let size = 14.0;
+                        let mut offset = 0.0;
+                        for array in [
+                            ( "Gender", vec!["Female", "Male"]),
+                            ( "Body", vec!["Body 1", "Body 2", "Body 3"]),
+                            ( "Color", vec!["Red", "Blue"]),
+                            ( "Hair", vec!["Short", "Bun", "Long", "Ponytail"]),
+                            ( "Beard", vec!["None"]),
+                        ] {
+                            let options: Vec<String> = array.1.iter().map(|&s| s.to_string()).collect();
+
+                            ui.spawn((
+                                Name::new(array.0),
+                                UiLayout::window().y(Rl(offset)).size(Rl((100.0, size))).pack(),
+                                //Spinner { name: array.0.into(), index: 0, options },
+                            ));
+
+                            offset += gap + size;
+                        }
+
+                    });
+
+                });
+
+            });
         });
     }
 }
@@ -478,8 +641,8 @@ impl SettingsScene {
         
         // Create embedd camera that will render to the texture
         let texture_camera = commands.spawn((
-            Camera2d, Camera::clear_render_to(image_handle.clone()),
-            // This filters out all the 
+            Camera2d, Camera::clear_render_to(image_handle.clone()).with_order(-1),
+            // This filters out all the normal entities
             RenderLayers::layer(1),
             // A scene marker for later mass scene despawn, not UI related
             SettingsScene
@@ -597,6 +760,7 @@ impl SettingsScene {
                 ui.spawn((
                     UiLayout::boundary().y1(Rl(10.0)).pos2(Rl(100.0)).pack(),
                     Sprite::from_image(image_handle),
+                    UiEmbedding,
                 ));
 
             });

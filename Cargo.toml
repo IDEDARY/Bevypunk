@@ -71,6 +71,7 @@
     "hdr",
     "multi_threaded",
     "png",
+    "jpeg",
     "smaa_luts",
     "sysinfo_plugin",
     "tonemapping_luts",
