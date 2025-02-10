@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use clap::Parser;
-use bevy::core_pipeline::bloom::Bloom;
+use bevy::{core_pipeline::bloom::Bloom, render::view::RenderLayers};
 
 pub(crate) use bevy::{prelude::*, sprite::Anchor};
 pub(crate) use bevy_kira_audio::prelude::*;
@@ -398,7 +398,8 @@ impl MainMenuScene {
     
                         // Enable the transition on hover
                         }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
-    
+                        
+                        // Assign a functionality to the buttons
                         match button {
                             "Settings" => {
                                 button_entity.observe(|_: Trigger<Pointer<Click>>, mut next: ResMut<NextState<AppState>>| {
@@ -406,7 +407,12 @@ impl MainMenuScene {
                                     next.set(AppState::Settings);
                                 });
                             },
-                            "Quit Game" => {},
+                            "Quit Game" => {
+                                button_entity.observe(|_: Trigger<Pointer<Click>>, mut exit: EventWriter<AppExit>| {
+                                    // Close the app
+                                    exit.send(AppExit::Success);
+                                });
+                            },
                             _ => {
                                 button_entity.observe(|c_trigger: Trigger<Pointer<Click>>, c_button: Query<NameOrEntity, With<UiLayout>>| {
                                     info!("Clicked: {}", c_button.get(c_trigger.entity()).unwrap());
@@ -426,7 +432,20 @@ impl MainMenuScene {
 #[derive(Component)]
 struct SettingsScene;
 impl SettingsScene {
-    fn spawn(mut commands: Commands, asset_server: Res<AssetServer>) {
+    fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, mut images: ResMut<Assets<Image>>) {
+        
+        // Create the transparent render texture
+        let image_handle = images.add(Image::clear_render_texture());
+        
+        // Create embedd camera that will render to the texture
+        let texture_camera = commands.spawn((
+            Camera2d, Camera::clear_render_to(image_handle.clone()),
+            // This filters out all the 
+            RenderLayers::layer(1),
+            // A scene marker for later mass scene despawn, not UI related
+            SettingsScene
+        )).id();
+        
         // Create UI
         commands.spawn((
             UiLayoutRoot,
@@ -534,9 +553,41 @@ impl SettingsScene {
                     });
     
                 });
-    
+
+                // Spawn the Bevy UI embedd
+                ui.spawn((
+                    UiLayout::boundary().y1(Rl(10.0)).pos2(Rl(100.0)).pack(),
+                    Sprite::from_image(image_handle),
+                ));
+
             });
-    
         });
+
+        // The Bevy UI nodes must be here to work
+        commands.spawn((
+            Node {
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            // Render this ui to our new camera
+            TargetCamera(texture_camera),
+            // A scene marker for later mass scene despawn, not UI related
+            SettingsScene
+        )).with_children(|parent| {
+            parent.spawn((
+                Text::new("This is a Bevy UI"),
+                TextFont {
+                    font_size: 64.0,
+                    font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
+                    ..default()
+                },
+                TextColor::WHITE,
+            ));
+        });
+
     }
 }
