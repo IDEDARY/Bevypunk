@@ -502,7 +502,7 @@ impl SettingsScene {
     
                 // Spawn the tab bar
                 ui.spawn((
-                    UiLayout::window().size(Rl((100.0, 10.0))).pack(),
+                    UiLayout::window().size(Rl((100.0, 8.0))).pack(),
                 )).with_children(|ui| {
     
                     // Spawn left chevron
@@ -512,8 +512,8 @@ impl SettingsScene {
                         Sprite::from_image(asset_server.load("images/ui/components/chevron_left.png")),
                         UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
                         UiColor::new(vec![
-                            (UiBase::id(), Color::BEVYPUNK_BLUE),
-                            (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                            (UiBase::id(), Color::BEVYPUNK_RED),
+                            (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
                         ]),
                     )).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
     
@@ -524,8 +524,8 @@ impl SettingsScene {
                         Sprite::from_image(asset_server.load("images/ui/components/chevron_right.png")),
                         UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
                         UiColor::new(vec![
-                            (UiBase::id(), Color::BEVYPUNK_BLUE),
-                            (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                            (UiBase::id(), Color::BEVYPUNK_RED),
+                            (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
                         ]),
                     )).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
     
@@ -547,13 +547,13 @@ impl SettingsScene {
                                 // Spawn the background
                                 ui.spawn((
                                     UiLayout::window().full().y(Rl(10.0)).height(Rl(80.0)).pack(),
-                                    UiHover::new().forward_speed(20.0).backward_speed(1.0),
+                                    UiHover::new().forward_speed(20.0).backward_speed(5.0),
                                     UiColor::new(vec![
                                         (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.0)),
                                         (UiHover::id(), Color::BEVYPUNK_RED.with_alpha(0.4))
                                     ]),
                                     Sprite {
-                                        image: asset_server.load("images/ui/components/button_symetric.png"),
+                                        image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
                                         image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
                                         ..default()
                                     },
@@ -567,7 +567,7 @@ impl SettingsScene {
                                             (UiBase::id(), Color::BEVYPUNK_RED),
                                             (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
                                         ]),
-                                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.ceil()),
+                                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
                                         UiTextSize::from(Rh(50.0)),
                                         Text2d::new(category.to_ascii_uppercase()),
                                         TextFont {
