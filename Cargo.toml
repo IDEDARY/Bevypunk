@@ -46,7 +46,7 @@
   #=== GAME ENGINE SOURCE === #
 
   # GAME ENGINE
-  bevy = { version = "^0.15.1", default-features = false, features = [
+  bevy = { version = "^0.15.2", default-features = false, features = [
     "animation",
     "bevy_asset",
     "bevy_color",
@@ -83,7 +83,7 @@
   #=== GAME ENGINE EXTENSIONS === #
 
   # ASSETS
-  vleue_kinetoscope = { git = "https://github.com/IDEDARY/vleue_kinetoscope", branch = "pause-pr"}
+  vleue_kinetoscope = { git = "https://github.com/vleue/vleue_kinetoscope" }
   bevy_embedded_assets = { version = "^0.12.0" }
 
   # AUDIO
@@ -100,4 +100,4 @@
 
   # OTHER
   rand = "^0.9.0"
-  clap = { version = "^4.5.27", features = ["derive"] }
+  clap = { version = "^4.5.28", features = ["derive"] }

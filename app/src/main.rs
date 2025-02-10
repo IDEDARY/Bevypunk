@@ -32,7 +32,9 @@ enum AppState {
     IntroMovie,
     /// The game main menu
     MainMenu,
-    /// The game main menu
+    /// The game creation
+    NewGame,
+    /// The game settings
     Settings,
 }
 
@@ -70,6 +72,7 @@ fn main() -> AppExit {
     app.add_systems(Startup, spawn_camera);
     app.add_systems(OnEnter(AppState::IntroMovie), IntroScene::spawn).add_systems(OnExit(AppState::IntroMovie), despawn_scene::<IntroScene>);
     app.add_systems(OnEnter(AppState::MainMenu), MainMenuScene::spawn).add_systems(OnExit(AppState::MainMenu), despawn_scene::<MainMenuScene>);
+    app.add_systems(OnEnter(AppState::NewGame), NewGameScene::spawn).add_systems(OnExit(AppState::NewGame), despawn_scene::<NewGameScene>);
     app.add_systems(OnEnter(AppState::Settings), SettingsScene::spawn).add_systems(OnExit(AppState::Settings), despawn_scene::<SettingsScene>);
 
     app.add_plugins((VFXPlugin, MoviePlugin));
@@ -401,6 +404,12 @@ impl MainMenuScene {
                         
                         // Assign a functionality to the buttons
                         match button {
+                            "New Game" => {
+                                button_entity.observe(|_: Trigger<Pointer<Click>>, mut next: ResMut<NextState<AppState>>| {
+                                    // Change the state to settings
+                                    next.set(AppState::NewGame);
+                                });
+                            },
                             "Settings" => {
                                 button_entity.observe(|_: Trigger<Pointer<Click>>, mut next: ResMut<NextState<AppState>>| {
                                     // Change the state to settings
@@ -424,6 +433,30 @@ impl MainMenuScene {
                     }
                 });
             });
+        });
+    }
+}
+
+
+#[derive(Component)]
+struct NewGameScene;
+impl NewGameScene {
+    fn spawn(mut commands: Commands, asset_server: Res<AssetServer>) {
+        // Create UI
+        commands.spawn((
+            UiLayoutRoot,
+            // Make the UI synchronized with camera viewport size
+            UiFetchFromCamera::<0>,
+            // A scene marker for later mass scene despawn, not UI related
+            NewGameScene
+        )).with_children(|ui| {
+    
+            // Spawn the background
+            ui.spawn((
+                Name::new("Background"),
+                UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
+                Sprite::from_image(asset_server.load("images/ui/background.png")),
+            ));
         });
     }
 }
