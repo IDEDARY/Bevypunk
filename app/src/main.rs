@@ -23,6 +23,10 @@ struct Args {
     /// Flag to skip the initial intro
     #[arg(short, long)]
     skip_intro: bool,
+
+    /// If to launch with low ram expectations
+    #[arg(short, long)]
+    lowram: bool,
 }
 
 /// Different app states for the Bevypunk game
@@ -59,7 +63,9 @@ fn main() -> AppExit {
 
     // Load the game intro if required
     if !args.skip_intro {
-        let intro = AnimatedImageLoader::load_now_from_bytes(include_bytes!("../../assets/movies/intro_720p.webp"),"webp", &mut app).expect("Priority load failed");
+        let intro = AnimatedImageLoader::load_now_from_bytes(
+            if args.lowram { include_bytes!("../../assets/movies/intro_720p.webp") } else { include_bytes!("../../assets/movies/intro_1080p.webp") },
+            "webp", &mut app).expect("Priority load failed");
         priority_assets.video.insert("intro".to_string(), intro);
     }
 

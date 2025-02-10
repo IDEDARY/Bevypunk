@@ -4,7 +4,7 @@
         {
             "type": "cargo",
             "command": "run",
-            "args": ["--bin", "bevypunk", "--", "--skip-intro"],
+            "args": ["--bin", "bevypunk", "--", "--skip-intro", "--lowram"],
             "problemMatcher": [
                 "$rustc"
             ],
@@ -14,7 +14,7 @@
         {
             "type": "cargo",
             "command": "run",
-            "args": ["--bin", "bevypunk"],
+            "args": ["--bin", "bevypunk", "--", "--lowram"],
             "problemMatcher": [
                 "$rustc"
             ],
