@@ -84,6 +84,9 @@ fn main() -> AppExit {
 
     app.add_plugins((VFXPlugin, ShowcaseCameraPlugin, MoviePlugin));
 
+    app.add_systems(Update, AnimatedText::system);
+    app.add_systems(Update, AnimatedTextor::system);
+
     app.run()
 }
 
@@ -152,7 +155,7 @@ impl IntroScene {
     fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, priority_assets: Res<PriorityAssets>) {
         // Create UI
         commands.spawn((
-            UiLayoutRoot,
+            UiLayoutRoot::new_2d(),
             // Make the UI synchronized with camera viewport size
             UiFetchFromCamera::<0>,
             // A scene marker for later mass scene despawn, not UI related
@@ -182,7 +185,7 @@ impl MainMenuScene {
 
         // Create UI
         commands.spawn((
-            UiLayoutRoot,
+            UiLayoutRoot::new_2d(),
             // Make the UI synchronized with camera viewport size
             UiFetchFromCamera::<0>,
             // A scene marker for later mass scene despawn, not UI related
@@ -276,7 +279,8 @@ impl MainMenuScene {
                                     // You can control the size of the text
                                     UiTextSize::from(Rh(60.0)),
                                     // You can attach text like this
-                                    Text2d::new(button.to_ascii_uppercase()),
+                                    Text2d::default(),
+                                    AnimatedTextor::new(button.to_ascii_uppercase()),
                                     TextFont {
                                         font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
                                         font_size: 64.0,
@@ -284,6 +288,26 @@ impl MainMenuScene {
                                     },
                                     // Make sure it does not cover the bounding zone of parent
                                     PickingBehavior::IGNORE,
+                                ));
+
+                                // Spawn the fluff
+                                ui.spawn((
+                                    // For text always use window layout to position it
+                                    UiLayout::window().pos(Rl((90.0, 50.0))).anchor(Anchor::CenterRight).pack(),
+                                    UiColor::new(vec![
+                                        (UiBase::id(), Color::BEVYPUNK_BLUE.with_alpha(0.2)),
+                                        (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                                    ]),
+                                    UiHover::new().forward_speed(20.0).backward_speed(4.0),
+                                    // You can control the size of the text
+                                    UiTextSize::from(Rh(60.0)),
+                                    // You can attach text like this
+                                    Text2d::new("<-"),
+                                    TextFont {
+                                        font: asset_server.load("fonts/rajdhani/Rajdhani-Bold.ttf"),
+                                        font_size: 64.0,
+                                        ..default()
+                                    },
                                 ));
                             });
 
@@ -320,8 +344,136 @@ impl MainMenuScene {
                         offset += gap + size;
                     }
                 });
+
+                // Spawn the Bevy version text
+                ui.spawn((
+                    // For text always use window layout to position it
+                    UiLayout::window().pos(Rl((87.0, 80.4))).anchor(Anchor::CenterRight).pack(),
+                    UiDepth::Add(5.0),
+                    UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.40)),
+                    // You can control the size of the text
+                    UiTextSize::from(Rw(3.5)),
+                    // You can attach text like this
+                    Text2d::new(""),
+                    AnimatedTextor::new("BEVY 0.15.3"),
+                    TextFont {
+                        font: asset_server.load("fonts/rajdhani/Rajdhani-Bold.ttf"),
+                        font_size: 48.0,
+                        ..default()
+                    },
+                ));
+
+                // Spawn the Lunex version text
+                ui.spawn((
+                    // For text always use window layout to position it
+                    UiLayout::window().pos(Rl((19.0, 83.5))).anchor(Anchor::CenterLeft).pack(),
+                    UiDepth::Add(5.0),
+                    UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.40)),
+                    // You can control the size of the text
+                    UiTextSize::from(Rw(5.5)),
+                    // You can attach text like this
+                    Text2d::new(""),
+                    AnimatedTextor::new("v0.3.0"),
+                    TextFont {
+                        font: asset_server.load("fonts/rajdhani/Rajdhani-Bold.ttf"),
+                        font_size: 48.0,
+                        ..default()
+                    },
+                ));
+
+                // Spawn the loading bar
+                ui.spawn((
+                    // For text always use window layout to position it
+                    UiLayout::window().pos(Rl((19.0, 87.0))).anchor(Anchor::CenterLeft).pack(),
+                    UiDepth::Add(5.0),
+                    UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.20)),
+                    // You can control the size of the text
+                    UiTextSize::from(Rh(3.0)),
+                    // You can attach text like this
+                    Text2d::new(">>>"),
+                    AnimatedText,
+                    TextFont {
+                        font: asset_server.load("fonts/rajdhani/Rajdhani-SemiBold.ttf"),
+                        font_size: 48.0,
+                        ..default()
+                    },
+                ));
+
+                // Spawn the loading bar
+                ui.spawn((
+                    // For text always use window layout to position it
+                    UiLayout::window().pos(Rl((19.0, 10.0))).anchor(Anchor::CenterLeft).pack(),
+                    UiDepth::Add(5.0),
+                    UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.10)),
+                    // You can control the size of the text
+                    UiTextSize::from(Rh(3.0)),
+                    // You can attach text like this
+                    Text2d::new(">>>"),
+                    AnimatedText,
+                    TextFont {
+                        font: asset_server.load("fonts/rajdhani/Rajdhani-SemiBold.ttf"),
+                        font_size: 48.0,
+                        ..default()
+                    },
+                ));
             });
         });
+    }
+}
+
+#[derive(Component)]
+struct AnimatedText;
+impl AnimatedText {
+    fn system(mut query: Query<&mut Text2d, With<AnimatedText>>, mut local: Local<f32>, mut counter: Local<usize>, time: Res<Time>, mut commads: Commands,) {
+        if *local < 0.2 { *local += time.delta_secs(); return; }
+        *local -= 0.2;
+        for mut text in &mut query {
+            if *counter < 12 {
+                text.0 += ">";
+                *counter += 1;
+            } else {
+                text.0 = ">>>".to_string();
+                *counter = 0;
+            }
+            commads.trigger(RecomputeUiLayout);
+        }
+    }
+}
+
+
+#[derive(Component)]
+pub struct AnimatedTextor {
+    string: String,
+    function: fn(t: f32, text: &str) -> String,
+    counter: f32,
+}
+impl Default for AnimatedTextor {
+    fn default() -> Self {
+        Self {
+            string: String::new(),
+            function: decryption_animation,
+            counter: 0.0,
+        }
+    }
+}
+impl AnimatedTextor {
+    pub fn new(text: impl std::fmt::Display) -> Self {
+        Self {
+            string: text.to_string(),
+            ..Default::default()
+        }
+    }
+    fn system(mut query: Query<(&mut Text2d, &mut AnimatedTextor)>, time: Res<Time>, mut commads: Commands) {
+        for (mut text, mut animator) in &mut query {
+
+            if animator.counter < 3.0 { animator.counter += time.delta_secs(); }
+            animator.counter = animator.counter.min(3.0);
+
+            text.0 = (animator.function)(animator.counter/3.0, &animator.string);
+            commads.trigger(RecomputeUiLayout);
+
+            //if animator.counter/3.0 < 0.4 { break; }
+        }
     }
 }
 
@@ -334,7 +486,7 @@ impl NewGameScene {
         // Create the transparent render texture
         let image_handle = images.add(Image::clear_render_texture());
 
-        // Create embedd camera that will render to the texture
+        // Spawn the 3D camera that will render to the texture
         commands.spawn((
             ShowcaseCamera {
                 orbit: Vec3::ZERO,
@@ -369,7 +521,7 @@ impl NewGameScene {
 
         // Create UI
         commands.spawn((
-            UiLayoutRoot,
+            UiLayoutRoot::new_2d(),
             // Make the UI synchronized with camera viewport size
             UiFetchFromCamera::<0>,
             // A scene marker for later mass scene despawn, not UI related
@@ -384,7 +536,7 @@ impl NewGameScene {
                 UiDepth::Set(0.0),
             ));
 
-            // Spawn the background
+            // Spawn the camera plane
             ui.spawn((
                 Name::new("Camera"),
                 UiLayout::window().full().pack(),
@@ -646,7 +798,7 @@ impl SettingsScene {
 
         // Create UI
         commands.spawn((
-            UiLayoutRoot,
+            UiLayoutRoot::new_2d(),
             // Make the UI synchronized with camera viewport size
             UiFetchFromCamera::<0>,
             // A scene marker for later mass scene despawn, not UI related
@@ -675,7 +827,7 @@ impl SettingsScene {
                         Name::new("Chevron Left"),
                         UiLayout::window().pos(Rl((5.0, 50.0))).anchor(Anchor::Center).size(Rh(35.0)).pack(),
                         Sprite::from_image(asset_server.load("images/ui/components/chevron_left.png")),
-                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                        UiHover::new().instant(true),
                         UiColor::new(vec![
                             (UiBase::id(), Color::BEVYPUNK_RED),
                             (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
@@ -687,7 +839,7 @@ impl SettingsScene {
                         Name::new("Chevron Right"),
                         UiLayout::window().pos(Rl((95.0, 50.0))).anchor(Anchor::Center).size(Rh(35.0)).pack(),
                         Sprite::from_image(asset_server.load("images/ui/components/chevron_right.png")),
-                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                        UiHover::new().instant(true),
                         UiColor::new(vec![
                             (UiBase::id(), Color::BEVYPUNK_RED),
                             (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
@@ -732,7 +884,7 @@ impl SettingsScene {
                                             (UiBase::id(), Color::BEVYPUNK_RED),
                                             (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
                                         ]),
-                                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                                        UiHover::new().instant(true),
                                         UiTextSize::from(Rh(50.0)),
                                         Text2d::new(category.to_ascii_uppercase()),
                                         TextFont {
