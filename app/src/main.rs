@@ -51,7 +51,7 @@ fn main() -> AppExit {
 
     // Add all Bevy plugins
     app.add_plugins(BevyPlugins);
-    app.add_plugins(UiLunexDebugPlugin::new());
+    //app.add_plugins(UiLunexDebugPlugin::new());
 
     // Set the correct app state
     app.insert_state(if args.skip_intro { AppState::MainMenu } else { AppState::IntroMovie });
@@ -112,31 +112,8 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
     )).with_children(|cam| {
 
         // Spawn cursor
-        /* cam.spawn ((
-            Cursor2d::new()
-                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
-                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
-                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
-
-            // Change the scale
-            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
-
-            // Change the sprite
-            Sprite {
-                image: asset_server.load("images/ui/cursor.png"),
-                texture_atlas: Some(TextureAtlas {
-                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
-                    index: 0,
-                }),
-                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
-                anchor: Anchor::TopLeft,
-                ..default()
-            },
-        )); */
-/*
-        // Spawn cursor
         cam.spawn ((
-            Cursor2d::new()
+            Cursor::new()
                 .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
                 .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
                 .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
@@ -155,105 +132,8 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
                 anchor: Anchor::TopLeft,
                 ..default()
             },
-            GamepadCursor::new(),
         ));
 
-        // Spawn cursor
-        cam.spawn ((
-            Cursor2d::new()
-                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
-                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
-                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
-
-            // Change the scale
-            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
-
-            // Change the sprite
-            Sprite {
-                image: asset_server.load("images/ui/cursor.png"),
-                texture_atlas: Some(TextureAtlas {
-                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
-                    index: 0,
-                }),
-                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
-                anchor: Anchor::TopLeft,
-                ..default()
-            },
-            GamepadCursor::new(),
-        ));
-
-        // Spawn cursor
-        cam.spawn ((
-            Cursor2d::new()
-                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
-                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
-                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
-
-            // Change the scale
-            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
-
-            // Change the sprite
-            Sprite {
-                image: asset_server.load("images/ui/cursor.png"),
-                texture_atlas: Some(TextureAtlas {
-                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
-                    index: 0,
-                }),
-                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
-                anchor: Anchor::TopLeft,
-                ..default()
-            },
-            GamepadCursor::new(),
-        ));
-
-        // Spawn cursor
-        cam.spawn ((
-            Cursor2d::new()
-                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
-                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
-                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
-
-            // Change the scale
-            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
-
-            // Change the sprite
-            Sprite {
-                image: asset_server.load("images/ui/cursor.png"),
-                texture_atlas: Some(TextureAtlas {
-                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
-                    index: 0,
-                }),
-                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
-                anchor: Anchor::TopLeft,
-                ..default()
-            },
-            GamepadCursor::new(),
-        ));
-
-        // Spawn cursor
-        cam.spawn ((
-            Cursor2d::new()
-                .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
-                .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
-                .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
-
-            // Change the scale
-            Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
-
-            // Change the sprite
-            Sprite {
-                image: asset_server.load("images/ui/cursor.png"),
-                texture_atlas: Some(TextureAtlas {
-                    layout: atlas_layout.add(TextureAtlasLayout::from_grid(UVec2::splat(80), 3, 1, None, None)),
-                    index: 0,
-                }),
-                color: Color::BEVYPUNK_YELLOW.with_alpha(1.0),
-                anchor: Anchor::TopLeft,
-                ..default()
-            },
-            GamepadCursor::new(),
-        ));
- */
     });
 }
 
@@ -277,12 +157,12 @@ impl IntroScene {
             // A scene marker for later mass scene despawn, not UI related
             IntroScene
         )).with_children(|ui| {
-    
+
             // Start the intro together with music
             ui.spawn((
                 UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
                 Movie::play(priority_assets.video.get("intro").unwrap().clone(), asset_server.load("audio/intro.ogg")).playback(MoviePlayback::Stop)
-    
+
             // Add observer that will change the state once the movie ends
             )).observe(|_: Trigger<MovieEnded>, mut next: ResMut<NextState<AppState>>| {
                 next.set(AppState::MainMenu);
@@ -297,8 +177,10 @@ struct MainMenuScene;
 impl MainMenuScene {
     fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
         // Start playing the music
-        audio.play(asset_server.load("audio/main_menu.ogg")).looped().fade_in(AudioTween::new(Duration::new(2, 0), AudioEasing::OutPowf(2.0)));
-    
+        if !audio.is_playing_sound() {
+            audio.play(asset_server.load("audio/main_menu.ogg")).looped().fade_in(AudioTween::new(Duration::new(2, 0), AudioEasing::OutPowf(2.0)));
+        }
+
         // Create UI
         commands.spawn((
             UiLayoutRoot,
@@ -307,7 +189,7 @@ impl MainMenuScene {
             // A scene marker for later mass scene despawn, not UI related
             MainMenuScene
         )).with_children(|ui| {
-    
+
             // Spawn the background
             ui.spawn((
                 // You can name your entites for easier debug
@@ -315,24 +197,24 @@ impl MainMenuScene {
                 UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
                 Sprite::from_image(asset_server.load("images/ui/background.png")),
             ));
-    
+
             // Add the panel boundary
             ui.spawn((
                 UiLayout::solid().size((881.0, 1600.0)).align_x(-0.74).pack(),
             )).with_children(|ui| {
-    
+
                 // Spawn the panel
                 ui.spawn((
                     Name::new("Panel"),
                     UiLayout::window().x(Rl(50.0)).anchor(Anchor::TopCenter).size(Rl(105.0)).pack(),
                     Sprite::from_image(asset_server.load("images/ui/panel_menu.png")),
                 ));
-    
+
                 // Spawn the logo boundary
                 ui.spawn((
                     UiLayout::window().y(Rl(11.0)).size(Rl((105.0, 20.0))).pack(),
                 )).with_children(|ui| {
-    
+
                     // Spawn the logo
                     ui.spawn((
                         Name::new("Logo"),
@@ -340,22 +222,23 @@ impl MainMenuScene {
                         Sprite::from_image(asset_server.load("images/ui/title.png")),
                     ));
                 });
-    
+
                 // Spawn button boundary
                 ui.spawn((
                     UiLayout::window().pos(Rl((22.0, 33.0))).size(Rl((55.0, 34.0))).pack(),
                 )).with_children(|ui| {
-    
+
                     // Spawn buttons
                     let gap = 3.0;
                     let size = 14.0;
                     let mut offset = 0.0;
                     for button in ["Continue", "New Game", "Load Game", "Settings", "Additional Content", "Credits", "Quit Game"] {
-    
+
                         // Spawn the button
                         let mut button_entity = ui.spawn((
                             Name::new(button),
                             UiLayout::window().y(Rl(offset)).size(Rl((100.0, size))).pack(),
+                            OnHoverSetCursor::new(bevy::window::SystemCursorIcon::Pointer),
                         ));
                         button_entity.with_children(|ui| {
                             // Spawn the image
@@ -381,7 +264,7 @@ impl MainMenuScene {
                                 // Make sure it does not cover the bounding zone of parent
                                 PickingBehavior::IGNORE,
                             )).with_children(|ui| {
-    
+
                                 // Spawn the text
                                 ui.spawn((
                                     // For text always use window layout to position it
@@ -404,10 +287,10 @@ impl MainMenuScene {
                                     PickingBehavior::IGNORE,
                                 ));
                             });
-    
+
                         // Enable the transition on hover
                         }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
-                        
+
                         // Assign a functionality to the buttons
                         match button {
                             "New Game" => {
@@ -434,7 +317,7 @@ impl MainMenuScene {
                                 });
                             }
                         }
-                        
+
                         offset += gap + size;
                     }
                 });
@@ -448,10 +331,10 @@ impl MainMenuScene {
 struct NewGameScene;
 impl NewGameScene {
     fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, mut images: ResMut<Assets<Image>>) {
-        
+
         // Create the transparent render texture
         let image_handle = images.add(Image::clear_render_texture());
-        
+
         // Create embedd camera that will render to the texture
         commands.spawn((
             Camera3d::default(), Camera::clear_render_to(image_handle.clone()).with_order(-1),
@@ -478,7 +361,7 @@ impl NewGameScene {
             // A scene marker for later mass scene despawn, not UI related
             NewGameScene
         ));
-        
+
         // Create UI
         commands.spawn((
             UiLayoutRoot,
@@ -487,7 +370,7 @@ impl NewGameScene {
             // A scene marker for later mass scene despawn, not UI related
             NewGameScene
         )).with_children(|ui| {
-    
+
             // Spawn the background
             ui.spawn((
                 Name::new("Background"),
@@ -569,14 +452,14 @@ impl NewGameScene {
 
             // Spawn panel boundary
             ui.spawn((
-                UiLayout::solid().size((879.0, 1600.0)).align_x(0.74).pack(),
+                UiLayout::solid().size((879.0, 1600.0)).align_x(0.82).pack(),
             )).with_children(|ui| {
-                
+
                 ui.spawn((
-                    UiLayout::window().x(Rl(50.0)).anchor(Anchor::TopCenter).size(Rl(105.0)).pack(),
-                    Sprite::from(asset_server.load("images/ui/panel_full.png"))
+                    UiLayout::window().x(Rl(50.0)).anchor(Anchor::TopCenter).size(Rl(100.0)).pack(),
+                    //Sprite::from(asset_server.load("images/ui/panel_full.png"))
                 )).with_children(|ui| {
-                    
+
                     // Spawn the text
                     ui.spawn((
                         // For text always use window layout to position it
@@ -596,27 +479,137 @@ impl NewGameScene {
                     // Spawn button boundary
                     ui.spawn((
                         Name::new("Button List"),
-                        UiLayout::window().pos(Rl((53.0, 15.0))).anchor(Anchor::TopCenter).size(Rl((60.0, 65.0))).pack(),
+                        UiLayout::window().pos(Rl((50.0, 18.0))).anchor(Anchor::TopCenter).size(Rl((80.0, 62.0))).pack(),
                     )).with_children(|ui| {
 
                         // Spawn buttons
-                        let gap = 5.0;
-                        let size = 14.0;
+                        let gap = 2.0;
+                        let size = 15.0;
                         let mut offset = 0.0;
                         for array in [
-                            ( "Gender", vec!["Female", "Male"]),
-                            ( "Body", vec!["Body 1", "Body 2", "Body 3"]),
-                            ( "Color", vec!["Red", "Blue"]),
-                            ( "Hair", vec!["Short", "Bun", "Long", "Ponytail"]),
-                            ( "Beard", vec!["None"]),
+                            ( "Voice tone", (0..16).collect::<Vec<usize>>()),
+                            ( "Skin tone", (0..16).collect()),
+                            ( "Skin type", (0..16).collect()),
+                            ( "Hairstyle", (0..16).collect()),
+                            ( "Hair color", (0..16).collect()),
+                            ( "Eyes", (0..16).collect()),
                         ] {
-                            let options: Vec<String> = array.1.iter().map(|&s| s.to_string()).collect();
 
                             ui.spawn((
                                 Name::new(array.0),
                                 UiLayout::window().y(Rl(offset)).size(Rl((100.0, size))).pack(),
-                                //Spinner { name: array.0.into(), index: 0, options },
-                            ));
+                            )).with_children(|ui| {
+
+                                ui.spawn((
+                                    UiLayout::window().size(Rl((100.0, 60.0))).pack(),
+                                )).with_children(|ui| {
+                                    // Spawn the image
+                                    ui.spawn((
+                                        UiLayout::window().full().pack(),
+                                        // Like this you can enable a state
+                                        UiHover::new().forward_speed(20.0).backward_speed(4.0),
+                                        // You can specify colors for multiple states
+                                        UiColor::new(vec![
+                                            (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.15)),
+                                            (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                                        ]),
+                                        Sprite {
+                                            image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
+                                            // Here we enable sprite slicing
+                                            image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                            ..default()
+                                        },
+                                        // Make sure it does not cover the bounding zone of parent
+                                        PickingBehavior::IGNORE,
+                                    )).with_children(|ui| {
+
+                                        // Spawn the text
+                                        ui.spawn((
+                                            // For text always use window layout to position it
+                                            UiLayout::window().pos((Rh(40.0), Rl(50.0))).anchor(Anchor::CenterLeft).pack(),
+                                            UiColor::new(vec![
+                                                (UiBase::id(), Color::BEVYPUNK_RED),
+                                                (UiHover::id(), Color::BEVYPUNK_YELLOW.with_alpha(1.2))
+                                            ]),
+                                            UiHover::new().forward_speed(20.0).backward_speed(4.0),
+                                            // You can control the size of the text
+                                            UiTextSize::from(Rh(60.0)),
+                                            // You can attach text like this
+                                            Text2d::new(array.0.to_uppercase()),
+                                            TextFont {
+                                                font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
+                                                font_size: 64.0,
+                                                ..default()
+                                            },
+                                            // Make sure it does not cover the bounding zone of parent
+                                            PickingBehavior::IGNORE,
+                                        ));
+                                    });
+
+                                // Enable the transition on hover
+                                });
+
+                                ui.spawn((
+                                    UiLayout::window().y(Rl(65.0)).size(Rl((48.5, 35.0))).pack(),
+                                )).with_children(|ui| {
+                                    ui.spawn((
+                                        UiLayout::window().full().pack(),
+                                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                                        UiColor::new(vec![
+                                            (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.15)),
+                                            (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
+                                        ]),
+                                        Sprite {
+                                            image: asset_server.load("images/ui/components/button_sliced_bottom_left.png"),
+                                            image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                            ..default()
+                                        },
+                                        PickingBehavior::IGNORE,
+                                    )).with_children(|ui| {
+                                        ui.spawn((
+                                            Name::new("Chevron Left"),
+                                            UiLayout::window().pos(Rl((50.0, 50.0))).anchor(Anchor::Center).size(Rh(65.0)).pack(),
+                                            Sprite::from_image(asset_server.load("images/ui/components/chevron_left.png")),
+                                            UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                                            UiColor::new(vec![
+                                                (UiBase::id(), Color::BEVYPUNK_RED),
+                                                (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
+                                            ]),
+                                        ));
+                                    });
+                                }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
+
+                                ui.spawn((
+                                    UiLayout::window().x(Rl(51.5)).y(Rl(65.0)).size(Rl((48.5, 35.0))).pack(),
+                                )).with_children(|ui| {
+                                    ui.spawn((
+                                        UiLayout::window().full().pack(),
+                                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                                        UiColor::new(vec![
+                                            (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.15)),
+                                            (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
+                                        ]),
+                                        Sprite {
+                                            image: asset_server.load("images/ui/components/button_sliced_bottom_right.png"),
+                                            image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                            ..default()
+                                        },
+                                        PickingBehavior::IGNORE,
+                                    )).with_children(|ui| {
+                                        ui.spawn((
+                                            Name::new("Chevron Right"),
+                                            UiLayout::window().pos(Rl((50.0, 50.0))).anchor(Anchor::Center).size(Rh(65.0)).pack(),
+                                            Sprite::from_image(asset_server.load("images/ui/components/chevron_right.png")),
+                                            UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                                            UiColor::new(vec![
+                                                (UiBase::id(), Color::BEVYPUNK_RED),
+                                                (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
+                                            ]),
+                                        ));
+                                    });
+                                }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
+
+                            });
 
                             offset += gap + size;
                         }
@@ -635,10 +628,10 @@ impl NewGameScene {
 struct SettingsScene;
 impl SettingsScene {
     fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, mut images: ResMut<Assets<Image>>) {
-        
+
         // Create the transparent render texture
         let image_handle = images.add(Image::clear_render_texture());
-        
+
         // Create embedd camera that will render to the texture
         let texture_camera = commands.spawn((
             Camera2d, Camera::clear_render_to(image_handle.clone()).with_order(-1),
@@ -647,7 +640,7 @@ impl SettingsScene {
             // A scene marker for later mass scene despawn, not UI related
             SettingsScene
         )).id();
-        
+
         // Create UI
         commands.spawn((
             UiLayoutRoot,
@@ -656,24 +649,24 @@ impl SettingsScene {
             // A scene marker for later mass scene despawn, not UI related
             SettingsScene
         )).with_children(|ui| {
-    
+
             // Spawn the background
             ui.spawn((
                 Name::new("Background"),
                 UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
                 Sprite::from_image(asset_server.load("images/ui/background.png")),
             ));
-    
+
             // Spawn the settings content
             ui.spawn((
                 UiLayout::solid().size((3.0, 3.0)).align_y(-1.0).pack(),
             )).with_children(|ui| {
-    
+
                 // Spawn the tab bar
                 ui.spawn((
                     UiLayout::window().size(Rl((100.0, 8.0))).pack(),
                 )).with_children(|ui| {
-    
+
                     // Spawn left chevron
                     ui.spawn((
                         Name::new("Chevron Left"),
@@ -685,7 +678,7 @@ impl SettingsScene {
                             (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
                         ]),
                     )).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
-    
+
                     // Spawn right chevron
                     ui.spawn((
                         Name::new("Chevron Right"),
@@ -697,22 +690,22 @@ impl SettingsScene {
                             (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
                         ]),
                     )).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
-    
+
                     // Spawn the control bar
                     ui.spawn((
                         UiLayout::window().x(Rl(10.0)).size(Rl((80.0, 100.0))).pack(),
                     )).with_children(|ui| {
-                        
+
                         let categories = ["Controls", "Sound", "Graphics", "Window"];
                         let pos = 100.0 / categories.len() as f32;
                         for (i, category) in categories.into_iter().enumerate() {
-    
+
                             // Spawn the button
                             ui.spawn((
                                 Name::new(category),
                                 UiLayout::window().x(Rl(pos * i as f32)).size(Rl((pos, 100.0))).pack(),
                             )).with_children(|ui| {
-                                
+
                                 // Spawn the background
                                 ui.spawn((
                                     UiLayout::window().full().y(Rl(10.0)).height(Rl(80.0)).pack(),
@@ -728,7 +721,7 @@ impl SettingsScene {
                                     },
                                     PickingBehavior::IGNORE,
                                 )).with_children(|ui| {
-    
+
                                     // Spawn the text
                                     ui.spawn((
                                         UiLayout::window().pos(Rl(50.0)).anchor(Anchor::Center).pack(),
@@ -747,13 +740,13 @@ impl SettingsScene {
                                         PickingBehavior::IGNORE,
                                     ));
                                 });
-                            
+
                             // Add the observers
                             }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>);
                         }
-        
+
                     });
-    
+
                 });
 
                 // Spawn the Bevy UI embedd

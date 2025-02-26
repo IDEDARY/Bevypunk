@@ -16,3 +16,6 @@ Cargo.lock
 # Krita backup files
 **/*.kra~
 **/*.png~
+
+**/*_draft.kra
+**/*_draft.png

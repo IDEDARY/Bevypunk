@@ -42,10 +42,10 @@ impl PluginGroup for BevyPlugins {
         });
 
         // Disable the buildin pointers
-        /* builder = builder.set(PointerInputPlugin { 
-            is_mouse_enabled: false,
-            is_touch_enabled: false,
-        }); */
+        builder = builder.set(PointerInputPlugin { 
+            is_mouse_enabled: true,
+            is_touch_enabled: true,
+        });
 
         // Add 3rd-party Bevy plugins
         builder = builder.add(AnimatedImagePlugin).add(AudioPlugin).add(UiLunexPlugin);
