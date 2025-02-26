@@ -37,6 +37,7 @@
 [workspace.dependencies]
 
   # GAME CRATES
+  game_cameras = { path = "crates/game_cameras" }
   game_loading = { path = "crates/game_loading" }
   game_movies = { path = "crates/game_movies" }
   game_preferences = { path = "crates/game_preferences" }

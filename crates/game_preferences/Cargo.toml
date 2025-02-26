@@ -15,6 +15,7 @@
 [dependencies]
 
   # GAME CRATES
+  game_cameras = { workspace = true }
   game_loading = { workspace = true }
   game_movies = { workspace = true }
   game_vfx = { workspace = true }

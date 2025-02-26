@@ -8,6 +8,7 @@ pub(crate) use bevy_kira_audio::prelude::*;
 pub(crate) use bevy_lunex::*;
 pub(crate) use vleue_kinetoscope::*;
 
+pub(crate) use game_cameras::*;
 pub(crate) use game_loading::*;
 pub(crate) use game_movies::*;
 pub(crate) use game_preferences::*;
@@ -81,7 +82,7 @@ fn main() -> AppExit {
     app.add_systems(OnEnter(AppState::NewGame), NewGameScene::spawn).add_systems(OnExit(AppState::NewGame), despawn_scene::<NewGameScene>);
     app.add_systems(OnEnter(AppState::Settings), SettingsScene::spawn).add_systems(OnExit(AppState::Settings), despawn_scene::<SettingsScene>);
 
-    app.add_plugins((VFXPlugin, MoviePlugin));
+    app.add_plugins((VFXPlugin, ShowcaseCameraPlugin, MoviePlugin));
 
     app.run()
 }
@@ -113,7 +114,7 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
 
         // Spawn cursor
         cam.spawn ((
-            Cursor::new()
+            SoftwareCursor::new()
                 .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
                 .set_index(bevy::window::SystemCursorIcon::Pointer, 1, (10.0, 12.0))
                 .set_index(bevy::window::SystemCursorIcon::Grab, 2, (40.0, 40.0)),
@@ -164,9 +165,7 @@ impl IntroScene {
                 Movie::play(priority_assets.video.get("intro").unwrap().clone(), asset_server.load("audio/intro.ogg")).playback(MoviePlayback::Stop)
 
             // Add observer that will change the state once the movie ends
-            )).observe(|_: Trigger<MovieEnded>, mut next: ResMut<NextState<AppState>>| {
-                next.set(AppState::MainMenu);
-            });
+            )).observe(|_: Trigger<MovieEnded>, mut next: ResMut<NextState<AppState>>| next.set(AppState::MainMenu) );
         });
     }
 }
@@ -337,6 +336,12 @@ impl NewGameScene {
 
         // Create embedd camera that will render to the texture
         commands.spawn((
+            ShowcaseCamera {
+                orbit: Vec3::ZERO,
+                distance: 2.0,
+                mouse_sensitivity: 0.1,
+                zoom_scale: 25.0,
+            },
             Camera3d::default(), Camera::clear_render_to(image_handle.clone()).with_order(-1),
             // A scene marker for later mass scene despawn, not UI related
             NewGameScene
@@ -395,6 +400,7 @@ impl NewGameScene {
             ui.spawn((
                 Name::new("Return"),
                 UiLayout::window().pos(Rl((2.0, 4.0))).size(Rl((16.0, 8.0))).pack(),
+                OnHoverSetCursor::new(bevy::window::SystemCursorIcon::Pointer),
             )).with_children(|ui| {
                 // Spawn the image
                 ui.spawn((
@@ -445,10 +451,7 @@ impl NewGameScene {
 
             // Enable the transition on hover
             }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>)
-            .observe(|_: Trigger<Pointer<Click>>, mut next: ResMut<NextState<AppState>>| {
-                // Change the state to settings
-                next.set(AppState::MainMenu);
-            });
+            .observe(|_: Trigger<Pointer<Click>>, mut next: ResMut<NextState<AppState>>| next.set(AppState::MainMenu) );
 
             // Spawn panel boundary
             ui.spawn((
@@ -545,16 +548,15 @@ impl NewGameScene {
                                             PickingBehavior::IGNORE,
                                         ));
                                     });
-
-                                // Enable the transition on hover
                                 });
 
                                 ui.spawn((
                                     UiLayout::window().y(Rl(65.0)).size(Rl((48.5, 35.0))).pack(),
+                                    OnHoverSetCursor::new(bevy::window::SystemCursorIcon::Pointer),
                                 )).with_children(|ui| {
                                     ui.spawn((
                                         UiLayout::window().full().pack(),
-                                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                                        UiHover::new().instant(true),
                                         UiColor::new(vec![
                                             (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.15)),
                                             (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
@@ -581,10 +583,11 @@ impl NewGameScene {
 
                                 ui.spawn((
                                     UiLayout::window().x(Rl(51.5)).y(Rl(65.0)).size(Rl((48.5, 35.0))).pack(),
+                                    OnHoverSetCursor::new(bevy::window::SystemCursorIcon::Pointer),
                                 )).with_children(|ui| {
                                     ui.spawn((
                                         UiLayout::window().full().pack(),
-                                        UiHover::new().forward_speed(20.0).backward_speed(20.0).curve(|v| v.round()),
+                                        UiHover::new().instant(true),
                                         UiColor::new(vec![
                                             (UiBase::id(), Color::BEVYPUNK_RED.with_alpha(0.15)),
                                             (UiHover::id(), Color::BEVYPUNK_BLUE.with_alpha(1.2))
