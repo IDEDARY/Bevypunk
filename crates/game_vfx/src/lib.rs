@@ -22,9 +22,6 @@ impl BevypunkColorPalette for Color {
 
 
 
-
-
-
 #[derive(Component)]
 pub struct VFXBloomFlicker;
 impl VFXBloomFlicker {
@@ -40,6 +37,7 @@ impl VFXBloomFlicker {
         }
     }
 }
+
 
 
 #[derive(Component, Reflect, Clone, PartialEq, Debug)]
@@ -148,7 +146,7 @@ impl TextAnimator {
             if animator.counter < animator.duration { animator.counter += time.delta_secs(); }
             let just_done = animator.counter >= animator.duration;
             animator.counter = animator.counter.min(animator.duration);
-            
+
             // Modify the text if changed
             if animator.counter != animator.duration || just_done {
                 text.0 = (animator.function)(animator.counter/animator.duration, &animator.string);
@@ -159,11 +157,12 @@ impl TextAnimator {
 }
 
 
+
 /// Simulates typing animation with an underscore cursor
 pub fn typing_animation(t: f32, text: &str) -> String {
     let visible_chars = (t * text.len() as f32).floor() as usize;
     let visible_chars = visible_chars.min(text.len());
-    
+
     if visible_chars < text.len() {
         // Show typed characters plus cursor
         format!("{}{}", &text[..visible_chars], "_")
@@ -187,10 +186,10 @@ pub fn decryption_animation(t: f32, text: &str) -> String {
     // Define symbols used
     let symbols = "!@#$%^&*()_+-=[]{}|;:'\",.<>/?`~";
     let mut result = String::with_capacity(text.len());
-    
+
     for (i, c) in text.chars().enumerate() {
         let char_progress = (t * text.len() as f32) - i as f32;
-        
+
         if char_progress < 0.0 {
             // Not yet started decrypting this character
             result.push(symbols.chars().nth(rng.random_range(0..symbols.len())).unwrap());
@@ -207,37 +206,7 @@ pub fn decryption_animation(t: f32, text: &str) -> String {
             }
         }
     }
-    
-    result
-}
 
-/// Creates a fade-in effect where characters gradually appear by increasing opacity
-/// In terminal this is simulated with different characters of increasing "density"
-pub fn fade_in_animation(t: f32, text: &str) -> String {
-    let visible_chars = (t * text.len() as f32 * 2.0).floor() as usize;
-    let fully_visible = visible_chars.min(text.len());
-    let partially_visible = (visible_chars.saturating_sub(text.len())).min(text.len());
-    
-    let density_chars = " .:;+=xX$&@#".chars().collect::<Vec<_>>();
-    let max_density = density_chars.len() - 1;
-    
-    let mut result = String::with_capacity(text.len());
-    
-    for (i, c) in text.chars().enumerate() {
-        if i < fully_visible {
-            // Fully visible characters
-            result.push(c);
-        } else if i < fully_visible + partially_visible {
-            // Partially visible characters (simulated with "density")
-            let progress = t * 2.0 - (i as f32 / text.len() as f32);
-            let density_index = (progress * max_density as f32).round() as usize;
-            result.push(density_chars[density_index]);
-        } else {
-            // Not yet visible
-            result.push(' ');
-        }
-    }
-    
     result
 }
 
@@ -245,16 +214,16 @@ pub fn fade_in_animation(t: f32, text: &str) -> String {
 pub fn slide_in_animation(t: f32, text: &str) -> String {
     let mut result = String::with_capacity(text.len());
     let center = text.len() / 2;
-    
+
     for (i, c) in text.chars().enumerate() {
         let distance_from_center = if i < center {
             center - i
         } else {
             i - center
         };
-        
+
         let char_progress = t * 2.0 - (distance_from_center as f32 / center as f32);
-        
+
         if char_progress >= 1.0 {
             // Character is fully visible
             result.push(c);
@@ -266,7 +235,7 @@ pub fn slide_in_animation(t: f32, text: &str) -> String {
             result.push(' ');
         }
     }
-    
+
     result
 }
 
@@ -275,33 +244,22 @@ pub fn scrambled_reveal_animation(t: f32, text: &str) -> String {
     // Create a seeded RNG for consistent scrambling
     let mut indices: Vec<usize> = (0..text.len()).collect();
     let seed = 42; // Fixed seed for consistent scrambling
-    let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
-    
+    let mut rng = StdRng::seed_from_u64(seed);
+
     // Shuffle indices to determine reveal order
     use rand::seq::SliceRandom;
     indices.shuffle(&mut rng);
-    
+
     let chars_to_reveal = (t * text.len() as f32).floor() as usize;
     let mut result = vec![' '; text.len()];
-    
+
     // Reveal characters in scrambled order
-    for i in 0..chars_to_reveal.min(text.len()) {
-        let idx = indices[i];
-        result[idx] = text.chars().nth(idx).unwrap();
+    for i in indices.iter().take(chars_to_reveal.min(text.len())) {
+        result[*i] = text.chars().nth(*i).unwrap();
     }
 
     result.into_iter().collect()
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

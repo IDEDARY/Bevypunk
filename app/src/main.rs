@@ -1,9 +1,9 @@
 use std::time::Duration;
 
 use clap::Parser;
-use bevy::{core_pipeline::bloom::Bloom, render::view::RenderLayers};
+use bevy::core_pipeline::bloom::Bloom;
 
-pub(crate) use bevy::{prelude::*, sprite::Anchor};
+pub(crate) use bevy::{prelude::*, sprite::Anchor, render::view::RenderLayers};
 pub(crate) use bevy_kira_audio::prelude::*;
 pub(crate) use bevy_lunex::*;
 pub(crate) use vleue_kinetoscope::*;
@@ -40,7 +40,7 @@ fn main() -> AppExit {
 
     // Add all Bevy plugins
     app.add_plugins(BevyPlugins(args));
-    //app.add_plugins(UiLunexDebugPlugin::new());
+    //app.add_plugins(UiLunexDebugPlugin::<1, 2>);
 
     // Set the correct app state
     app.insert_state(if args.skip_intro { AppState::MainMenu } else { AppState::IntroMovie });
@@ -97,7 +97,7 @@ fn preload(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atlas_layout: ResMut<Assets<TextureAtlasLayout>>) {
     // Spawn the camera
     commands.spawn((
-        Camera2d, Camera { hdr: true, ..default() }, Bloom::OLD_SCHOOL, VFXBloomFlicker, UiSourceCamera::<0>, Transform::from_translation(Vec3::Z * 1000.0),
+        Camera2d, Camera { hdr: true, clear_color: ClearColorConfig::Custom(Color::srgba(0.0, 0.0, 0.0, 0.0)), ..default() }, RenderLayers::from_layers(&[0, 1]), Bloom::OLD_SCHOOL, VFXBloomFlicker, UiSourceCamera::<0>, Transform::from_translation(Vec3::Z * 1000.0),
     )).with_children(|cam| {
 
         // Spawn cursor
@@ -389,7 +389,7 @@ impl MainMenuScene {
                     // For text always use window layout to position it
                     UiLayout::window().pos(Rl((19.0, 10.0))).anchor(Anchor::CenterLeft).pack(),
                     UiDepth::Add(5.0),
-                    UiColor::from(Color::BEVYPUNK_BLUE.with_alpha(0.10)),
+                    UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.10)),
                     // You can control the size of the text
                     UiTextSize::from(Rh(3.0)),
                     // You can attach text like this
@@ -410,7 +410,13 @@ impl MainMenuScene {
 #[derive(Component)]
 struct NewGameScene;
 impl NewGameScene {
-    fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, mut images: ResMut<Assets<Image>>) {
+    fn spawn(
+        mut commands: Commands,
+        asset_server: Res<AssetServer>,
+        mut images: ResMut<Assets<Image>>,
+        mut meshes: ResMut<Assets<Mesh>>,
+        mut materials: ResMut<Assets<StandardMaterial>>,
+    ) {
 
         // Create the transparent render texture
         let image_handle = images.add(Image::clear_render_texture());
@@ -424,8 +430,10 @@ impl NewGameScene {
                 zoom_scale: 25.0,
             },
             Camera3d::default(), Camera::clear_render_to(image_handle.clone()).with_order(-1),
+            // Set the render layers to be Default + 3D UI Debug for gizmos
+            RenderLayers::from_layers(&[0, 2]),
             // A scene marker for later mass scene despawn, not UI related
-            NewGameScene
+            NewGameScene,
         ));
 
         // Spawn the model
@@ -458,12 +466,12 @@ impl NewGameScene {
         )).with_children(|ui| {
 
             // Spawn the background
-            ui.spawn((
+            /* ui.spawn((
                 Name::new("Background"),
                 UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
                 Sprite::from_image(asset_server.load("images/ui/background.png")),
                 UiDepth::Set(0.0),
-            ));
+            )); */
 
             // Spawn the camera plane
             ui.spawn((
@@ -534,7 +542,7 @@ impl NewGameScene {
             }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>)
             .observe(|_: Trigger<Pointer<Click>>, mut next: ResMut<NextState<AppState>>| next.set(AppState::MainMenu) );
 
-            // Spawn panel boundary
+            /* // Spawn panel boundary
             ui.spawn((
                 UiLayout::solid().size((879.0, 1600.0)).align_x(0.82).pack(),
             )).with_children(|ui| {
@@ -702,7 +710,35 @@ impl NewGameScene {
 
                 });
 
+            }); */
+        });
+
+        commands.spawn((
+            // Required to mark this as 3D
+            UiRoot3d,
+            // Use this constructor to init 3D settings
+            UiLayoutRoot::new_3d(),
+            // Provide default size instead from camera
+            Dimension::from((0.818, 0.965)),
+        )).with_children(|ui| {
+
+            let quad_handle = meshes.add(Rectangle::new(0.818, 0.965));
+
+            // this material renders the texture normally
+            let material_handle = materials.add(StandardMaterial {
+                base_color_texture: Some(asset_server.load("images/ui/panel_draft.png")),
+                alpha_mode: AlphaMode::Blend,
+                unlit: true,
+                ..default()
             });
+
+            ui.spawn((
+                Name::new("Panel"),
+                UiLayout::window().full().pack(),
+                Mesh3d(quad_handle.clone()),
+                MeshMaterial3d(material_handle),
+            ));
+
         });
     }
 }
