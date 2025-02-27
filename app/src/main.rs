@@ -40,7 +40,7 @@ fn main() -> AppExit {
 
     // Add all Bevy plugins
     app.add_plugins(BevyPlugins(args));
-    //app.add_plugins(UiLunexDebugPlugin::<1, 2>);
+    app.add_plugins(UiLunexDebugPlugin::<1, 2>);
 
     // Set the correct app state
     app.insert_state(if args.skip_intro { AppState::MainMenu } else { AppState::IntroMovie });
@@ -414,7 +414,6 @@ impl NewGameScene {
         mut commands: Commands,
         asset_server: Res<AssetServer>,
         mut images: ResMut<Assets<Image>>,
-        mut meshes: ResMut<Assets<Mesh>>,
         mut materials: ResMut<Assets<StandardMaterial>>,
     ) {
 
@@ -722,23 +721,21 @@ impl NewGameScene {
             Dimension::from((0.818, 0.965)),
         )).with_children(|ui| {
 
-            let quad_handle = meshes.add(Rectangle::new(0.818, 0.965));
-
-            // this material renders the texture normally
-            let material_handle = materials.add(StandardMaterial {
-                base_color_texture: Some(asset_server.load("images/ui/panel_draft.png")),
-                alpha_mode: AlphaMode::Blend,
-                unlit: true,
-                ..default()
-            });
-
+            // Spawn the panel
             ui.spawn((
                 Name::new("Panel"),
+                // Set the layout of this mesh
                 UiLayout::window().full().pack(),
-                Mesh3d(quad_handle.clone()),
-                MeshMaterial3d(material_handle),
+                // Provide a material to this mesh
+                MeshMaterial3d(materials.add(StandardMaterial {
+                    base_color_texture: Some(asset_server.load("images/ui/panel_draft.png")),
+                    alpha_mode: AlphaMode::Blend,
+                    unlit: true,
+                    ..default()
+                })),
+                // This component will tell Lunex to reconstruct this mesh as plane on demand
+                UiMeshPlane,
             ));
-
         });
     }
 }
