@@ -3,10 +3,28 @@ use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use bevy_kira_audio::AudioPlugin;
 use bevy_lunex::UiLunexPlugin;
 use vleue_kinetoscope::AnimatedImagePlugin;
+use clap::Parser;
+
+
+/// Launch arguments for the Bevypunk game
+#[derive(Parser, Debug, Clone, Copy)]
+pub struct Args {
+    /// Flag to skip the initial intro
+    #[arg(short, long)]
+    pub skip_intro: bool,
+
+    /// If to launch with low ram expectations
+    #[arg(short, long)]
+    pub lowram: bool,
+
+    /// Choose to run with weaker GPU
+    #[arg(short, long)]
+    pub powersaver: bool,
+}
 
 
 /// Plugin group implementing minimal default logic.
-pub struct BevyPlugins;
+pub struct BevyPlugins(pub Args);
 impl PluginGroup for BevyPlugins {
     fn build(self) -> PluginGroupBuilder {
         let mut builder = PluginGroupBuilder::start::<Self>();
@@ -34,7 +52,7 @@ impl PluginGroup for BevyPlugins {
         builder = builder.set(RenderPlugin {
             render_creation: RenderCreation::Automatic(
                 WgpuSettings {
-                    power_preference: PowerPreference::HighPerformance,
+                    power_preference: if !self.0.powersaver { PowerPreference::HighPerformance } else { PowerPreference::LowPower },
                     ..default()
                 }
             ),

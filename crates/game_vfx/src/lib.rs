@@ -1,6 +1,7 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
 use bevy::{core_pipeline::bloom::Bloom, prelude::*};
+use bevy_lunex::*;
 use rand::{Rng, SeedableRng, rngs::StdRng};
 
 
@@ -41,10 +42,121 @@ impl VFXBloomFlicker {
 }
 
 
+#[derive(Component, Reflect, Clone, PartialEq, Debug)]
+pub struct AnimatedTextSlider {
+    duration: f32,
+    initial: String,
+    step: String,
+    len: usize,
+    clock: f32,
+    counter: usize,
+}
+impl Default for AnimatedTextSlider {
+    fn default() -> Self {
+        Self {
+            duration: 0.2,
+            initial: ">>>".to_string(),
+            step: ">".to_string(),
+            len: 12,
+            clock: 0.0,
+            counter: 0,
+        }
+    }
+}
+impl AnimatedTextSlider {
+    /// Creates new instance
+    pub fn new(initial: impl std::fmt::Display) -> Self {
+        Self {
+            initial: initial.to_string(),
+            ..Default::default()
+        }
+    }
+    /// Replace the default step string with a new one.
+    pub fn step(mut self, step: impl std::fmt::Display) -> Self {
+        self.step = step.to_string();
+        self
+    }
+    /// Replace the default final string lenght with a new one.
+    pub fn len(mut self, len: usize) -> Self {
+        self.len = len;
+        self
+    }
+    /// Replace the default step duration in seconds with a new one.
+    pub fn duration(mut self, duration: f32) -> Self {
+        self.duration = duration;
+        self
+    }
+    /// This system takes care of updating the AnimatedTextSlider in time.
+    fn system(mut query: Query<(&mut Text2d, &mut AnimatedTextSlider)>, time: Res<Time>, mut commads: Commands,) {
+        for (mut text, mut animator) in &mut query {
+            if animator.clock < animator.duration { animator.clock += time.delta_secs(); continue; }
+            animator.clock -= animator.duration;
 
+            if animator.counter < animator.len {
+                text.0 += &animator.step;
+                animator.counter += 1;
+            } else {
+                text.0 = animator.initial.clone();
+                animator.counter = 0;
+            }
+            commads.trigger(RecomputeUiLayout);
+        }
+    }
+}
 
+/// This component modifies attached [`Text2d`] with a modified string outputted from a time dependant function.
+#[derive(Component, Reflect, Clone, PartialEq, Debug)]
+pub struct TextAnimator {
+    string: String,
+    function: fn(t: f32, text: &str) -> String,
+    counter: f32,
+    duration: f32,
+}
+impl Default for TextAnimator {
+    fn default() -> Self {
+        Self {
+            string: String::new(),
+            function: decryption_animation,
+            counter: 0.0,
+            duration: 3.0,
+        }
+    }
+}
+impl TextAnimator {
+    /// Creates new instance
+    pub fn new(text: impl std::fmt::Display) -> Self {
+        Self {
+            string: text.to_string(),
+            ..Default::default()
+        }
+    }
+    /// Replace the default function with a new one. The function provided takes time as input and original string and outputs modified string.
+    pub fn function(mut self, function: fn(t: f32, text: &str) -> String) -> Self {
+        self.function = function;
+        self
+    }
+    /// Replace the default duration in seconds with a new one.
+    pub fn duration(mut self, duration: f32) -> Self {
+        self.duration = duration;
+        self
+    }
+    /// This system takes care of updating the TextAnimator in time.
+    fn system(mut query: Query<(&mut Text2d, &mut TextAnimator)>, time: Res<Time>, mut commads: Commands) {
+        for (mut text, mut animator) in &mut query {
 
-
+            // Increment the time counter
+            if animator.counter < animator.duration { animator.counter += time.delta_secs(); }
+            let just_done = animator.counter >= animator.duration;
+            animator.counter = animator.counter.min(animator.duration);
+            
+            // Modify the text if changed
+            if animator.counter != animator.duration || just_done {
+                text.0 = (animator.function)(animator.counter/animator.duration, &animator.string);
+                commads.trigger(RecomputeUiLayout);
+            }
+        }
+    }
+}
 
 
 /// Simulates typing animation with an underscore cursor
@@ -70,7 +182,7 @@ pub fn decryption_animation(t: f32, text: &str) -> String {
     let seed: u64 = hasher.finish();
 
     // Create unique reproducible RNG from time
-    let mut rng = StdRng::seed_from_u64(seed + (t*20.0).round() as u64);
+    let mut rng = StdRng::seed_from_u64(seed + (t*60.0).round() as u64);
 
     // Define symbols used
     let symbols = "!@#$%^&*()_+-=[]{}|;:'\",.<>/?`~";
@@ -177,7 +289,7 @@ pub fn scrambled_reveal_animation(t: f32, text: &str) -> String {
         let idx = indices[i];
         result[idx] = text.chars().nth(idx).unwrap();
     }
-    
+
     result.into_iter().collect()
 }
 
@@ -197,6 +309,9 @@ pub fn scrambled_reveal_animation(t: f32, text: &str) -> String {
 pub struct VFXPlugin;
 impl Plugin for VFXPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, VFXBloomFlicker::system);
+        app
+            .add_systems(Update, VFXBloomFlicker::system)
+            .add_systems(Update, TextAnimator::system)
+            .add_systems(Update, AnimatedTextSlider::system);
     }
 }

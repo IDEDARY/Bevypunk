@@ -16,6 +16,7 @@
 
   # GAME ENGINE
   bevy = { workspace = true }
+  bevy_lunex = { workspace = true }
 
   # OTHER
   rand = { workspace = true }

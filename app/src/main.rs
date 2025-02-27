@@ -18,18 +18,6 @@ pub(crate) use game_vfx::*;
 // #==========================#
 // #=== MAIN APP STRUCTURE ===#
 
-/// Launch arguments for the Bevypunk game
-#[derive(Parser, Debug)]
-struct Args {
-    /// Flag to skip the initial intro
-    #[arg(short, long)]
-    skip_intro: bool,
-
-    /// If to launch with low ram expectations
-    #[arg(short, long)]
-    lowram: bool,
-}
-
 /// Different app states for the Bevypunk game
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 enum AppState {
@@ -51,7 +39,7 @@ fn main() -> AppExit {
     let args = Args::parse();
 
     // Add all Bevy plugins
-    app.add_plugins(BevyPlugins);
+    app.add_plugins(BevyPlugins(args));
     //app.add_plugins(UiLunexDebugPlugin::new());
 
     // Set the correct app state
@@ -83,9 +71,6 @@ fn main() -> AppExit {
     app.add_systems(OnEnter(AppState::Settings), SettingsScene::spawn).add_systems(OnExit(AppState::Settings), despawn_scene::<SettingsScene>);
 
     app.add_plugins((VFXPlugin, ShowcaseCameraPlugin, MoviePlugin));
-
-    app.add_systems(Update, AnimatedText::system);
-    app.add_systems(Update, AnimatedTextor::system);
 
     app.run()
 }
@@ -280,7 +265,7 @@ impl MainMenuScene {
                                     UiTextSize::from(Rh(60.0)),
                                     // You can attach text like this
                                     Text2d::default(),
-                                    AnimatedTextor::new(button.to_ascii_uppercase()),
+                                    TextAnimator::new(button.to_ascii_uppercase()).function(decryption_animation).duration(5.0),
                                     TextFont {
                                         font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
                                         font_size: 64.0,
@@ -355,7 +340,7 @@ impl MainMenuScene {
                     UiTextSize::from(Rw(3.5)),
                     // You can attach text like this
                     Text2d::new(""),
-                    AnimatedTextor::new("BEVY 0.15.3"),
+                    TextAnimator::new("BEVY 0.15.3").function(slide_in_animation).duration(5.0),
                     TextFont {
                         font: asset_server.load("fonts/rajdhani/Rajdhani-Bold.ttf"),
                         font_size: 48.0,
@@ -373,7 +358,7 @@ impl MainMenuScene {
                     UiTextSize::from(Rw(5.5)),
                     // You can attach text like this
                     Text2d::new(""),
-                    AnimatedTextor::new("v0.3.0"),
+                    TextAnimator::new("v0.3.0").function(typing_animation).duration(5.0),
                     TextFont {
                         font: asset_server.load("fonts/rajdhani/Rajdhani-Bold.ttf"),
                         font_size: 48.0,
@@ -390,8 +375,8 @@ impl MainMenuScene {
                     // You can control the size of the text
                     UiTextSize::from(Rh(3.0)),
                     // You can attach text like this
-                    Text2d::new(">>>"),
-                    AnimatedText,
+                    Text2d::new(""),
+                    AnimatedTextSlider::new(">>>"),
                     TextFont {
                         font: asset_server.load("fonts/rajdhani/Rajdhani-SemiBold.ttf"),
                         font_size: 48.0,
@@ -404,12 +389,12 @@ impl MainMenuScene {
                     // For text always use window layout to position it
                     UiLayout::window().pos(Rl((19.0, 10.0))).anchor(Anchor::CenterLeft).pack(),
                     UiDepth::Add(5.0),
-                    UiColor::from(Color::BEVYPUNK_RED.with_alpha(0.10)),
+                    UiColor::from(Color::BEVYPUNK_BLUE.with_alpha(0.10)),
                     // You can control the size of the text
                     UiTextSize::from(Rh(3.0)),
                     // You can attach text like this
                     Text2d::new(">>>"),
-                    AnimatedText,
+                    AnimatedTextSlider::new(">>>").step("-").duration(0.1).len(35),
                     TextFont {
                         font: asset_server.load("fonts/rajdhani/Rajdhani-SemiBold.ttf"),
                         font_size: 48.0,
@@ -418,62 +403,6 @@ impl MainMenuScene {
                 ));
             });
         });
-    }
-}
-
-#[derive(Component)]
-struct AnimatedText;
-impl AnimatedText {
-    fn system(mut query: Query<&mut Text2d, With<AnimatedText>>, mut local: Local<f32>, mut counter: Local<usize>, time: Res<Time>, mut commads: Commands,) {
-        if *local < 0.2 { *local += time.delta_secs(); return; }
-        *local -= 0.2;
-        for mut text in &mut query {
-            if *counter < 12 {
-                text.0 += ">";
-                *counter += 1;
-            } else {
-                text.0 = ">>>".to_string();
-                *counter = 0;
-            }
-            commads.trigger(RecomputeUiLayout);
-        }
-    }
-}
-
-
-#[derive(Component)]
-pub struct AnimatedTextor {
-    string: String,
-    function: fn(t: f32, text: &str) -> String,
-    counter: f32,
-}
-impl Default for AnimatedTextor {
-    fn default() -> Self {
-        Self {
-            string: String::new(),
-            function: decryption_animation,
-            counter: 0.0,
-        }
-    }
-}
-impl AnimatedTextor {
-    pub fn new(text: impl std::fmt::Display) -> Self {
-        Self {
-            string: text.to_string(),
-            ..Default::default()
-        }
-    }
-    fn system(mut query: Query<(&mut Text2d, &mut AnimatedTextor)>, time: Res<Time>, mut commads: Commands) {
-        for (mut text, mut animator) in &mut query {
-
-            if animator.counter < 3.0 { animator.counter += time.delta_secs(); }
-            animator.counter = animator.counter.min(3.0);
-
-            text.0 = (animator.function)(animator.counter/3.0, &animator.string);
-            commads.trigger(RecomputeUiLayout);
-
-            //if animator.counter/3.0 < 0.4 { break; }
-        }
     }
 }
 
