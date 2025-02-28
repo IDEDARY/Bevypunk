@@ -422,12 +422,7 @@ impl NewGameScene {
 
         // Spawn the 3D camera that will render to the texture
         commands.spawn((
-            ShowcaseCamera {
-                orbit: Vec3::ZERO,
-                distance: 2.0,
-                mouse_sensitivity: 0.1,
-                zoom_scale: 25.0,
-            },
+            ShowcaseCamera::default(),
             Camera3d::default(), Camera::clear_render_to(image_handle.clone()).with_order(-1),
             // Set the render layers to be Default + 3D UI Debug for gizmos
             RenderLayers::from_layers(&[0, 2]),
@@ -465,12 +460,12 @@ impl NewGameScene {
         )).with_children(|ui| {
 
             // Spawn the background
-            /* ui.spawn((
+            ui.spawn((
                 Name::new("Background"),
                 UiLayout::solid().size((1920.0, 1080.0)).scaling(Scaling::Fill).pack(),
                 Sprite::from_image(asset_server.load("images/ui/background.png")),
                 UiDepth::Set(0.0),
-            )); */
+            ));
 
             // Spawn the camera plane
             ui.spawn((
@@ -541,7 +536,7 @@ impl NewGameScene {
             }).observe(hover_set::<Pointer<Over>, true>).observe(hover_set::<Pointer<Out>, false>)
             .observe(|_: Trigger<Pointer<Click>>, mut next: ResMut<NextState<AppState>>| next.set(AppState::MainMenu) );
 
-            /* // Spawn panel boundary
+            // Spawn panel boundary
             ui.spawn((
                 UiLayout::solid().size((879.0, 1600.0)).align_x(0.82).pack(),
             )).with_children(|ui| {
@@ -709,7 +704,7 @@ impl NewGameScene {
 
                 });
 
-            }); */
+            });
         });
 
         commands.spawn((
@@ -717,7 +712,7 @@ impl NewGameScene {
             UiRoot3d,
             // Use this constructor to init 3D settings
             UiLayoutRoot::new_3d(),
-            // Provide default size instead from camera
+            // Provide default size instead of camera
             Dimension::from((0.818, 0.965)),
         )).with_children(|ui| {
 
@@ -734,7 +729,7 @@ impl NewGameScene {
                     ..default()
                 })),
                 // This component will tell Lunex to reconstruct this mesh as plane on demand
-                UiMeshPlane,
+                UiMeshPlane3d,
             ));
         });
     }

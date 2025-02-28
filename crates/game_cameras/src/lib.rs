@@ -1,9 +1,7 @@
 use bevy::{input::mouse::{MouseMotion, MouseWheel}, prelude::*};
 
-// #========================================#
-// #=== BOILERPLATE REQUIRED FOR BEVYCOM ===#
 
-#[derive(Component, Reflect, Clone, PartialEq, Debug, Default)]
+#[derive(Component, Reflect, Clone, PartialEq, Debug)]
 pub struct ShowcaseCamera {
     pub orbit: Vec3,
     pub distance: f32,
@@ -52,6 +50,17 @@ impl ShowcaseCamera {
         }
     }
 }
+impl Default for ShowcaseCamera {
+    fn default() -> Self {
+        Self {
+            orbit: Vec3::ZERO,
+            distance: 2.0,
+            mouse_sensitivity: 0.1,
+            zoom_scale: 25.0,
+        }
+    }
+}
+
 
 pub struct ShowcaseCameraPlugin;
 impl Plugin for ShowcaseCameraPlugin {
