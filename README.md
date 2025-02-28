@@ -2,7 +2,7 @@
 
 <div align="center">
   <a href="https://crates.io/crates/bevy_lunex"><img src="https://img.shields.io/crates/v/bevy_lunex?label=bevy_lunex&color=fff444"></a>
-  <a href="https://crates.io/crates/bevy"><img src="https://img.shields.io/badge/v0.15.1-white.svg?label=bevy&color=fff444"></a>
+  <a href="https://crates.io/crates/bevy"><img src="https://img.shields.io/badge/v0.15.X-white.svg?label=bevy&color=fff444"></a>
   <a href="./LICENSE-MIT"><img src="https://img.shields.io/badge/License-Apache/MIT-white.svg?label=license&color=fff444"></a>
 </div>
 

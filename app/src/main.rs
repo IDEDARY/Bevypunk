@@ -40,7 +40,7 @@ fn main() -> AppExit {
 
     // Add all Bevy plugins
     app.add_plugins(BevyPlugins(args));
-    app.add_plugins(UiLunexDebugPlugin::<1, 2>);
+    //app.add_plugins(UiLunexDebugPlugin::<1, 2>);
 
     // Set the correct app state
     app.insert_state(if args.skip_intro { AppState::MainMenu } else { AppState::IntroMovie });
@@ -265,7 +265,7 @@ impl MainMenuScene {
                                     UiTextSize::from(Rh(60.0)),
                                     // You can attach text like this
                                     Text2d::default(),
-                                    TextAnimator::new(button.to_ascii_uppercase()).function(decryption_animation).duration(5.0),
+                                    TextAnimator::new(button.to_ascii_uppercase()).function(decryption_animation).duration(1.0),
                                     TextFont {
                                         font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
                                         font_size: 64.0,
@@ -340,7 +340,7 @@ impl MainMenuScene {
                     UiTextSize::from(Rw(3.5)),
                     // You can attach text like this
                     Text2d::new(""),
-                    TextAnimator::new("BEVY 0.15.3").function(slide_in_animation).duration(5.0),
+                    TextAnimator::new("BEVY 0.15.3").function(typing_animation).duration(3.0),
                     TextFont {
                         font: asset_server.load("fonts/rajdhani/Rajdhani-Bold.ttf"),
                         font_size: 48.0,
@@ -358,7 +358,7 @@ impl MainMenuScene {
                     UiTextSize::from(Rw(5.5)),
                     // You can attach text like this
                     Text2d::new(""),
-                    TextAnimator::new("v0.3.0").function(typing_animation).duration(5.0),
+                    TextAnimator::new("v0.3.0").function(typing_animation).duration(3.0),
                     TextFont {
                         font: asset_server.load("fonts/rajdhani/Rajdhani-Bold.ttf"),
                         font_size: 48.0,
