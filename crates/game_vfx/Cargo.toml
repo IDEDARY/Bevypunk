@@ -20,3 +20,4 @@
 
   # OTHER
   rand = { workspace = true }
+  getrandom = { workspace = true }

@@ -20,6 +20,10 @@ pub struct Args {
     /// Choose to run with weaker GPU
     #[arg(short, long)]
     pub powersaver: bool,
+
+    /// Should start as windowed instead of fullscreen
+    #[arg(short, long)]
+    pub windowed: bool,
 }
 
 
@@ -39,8 +43,7 @@ impl PluginGroup for BevyPlugins {
         builder = builder.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Bevypunk".into(),
-                //mode: WindowMode::BorderlessFullscreen(MonitorSelection::Current),
-                mode: WindowMode::Windowed,
+                mode: if self.0.windowed { WindowMode::Windowed } else { WindowMode::BorderlessFullscreen(MonitorSelection::Current) },
                 present_mode: PresentMode::AutoVsync,
                 resolution: WindowResolution::new(1280.0, 720.0),
                 ..default()

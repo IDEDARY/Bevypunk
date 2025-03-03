@@ -36,7 +36,11 @@ fn main() -> AppExit {
     // ----- NEW APPLICATION INSTANCE -----
 
     let mut app = App::new();
-    let args = Args::parse();
+    #[allow(unused_mut)]
+    let mut args = Args::parse();
+
+    #[cfg(target_arch = "wasm32")]
+    {args.skip_intro = true;}
 
     // Add all Bevy plugins
     app.add_plugins(BevyPlugins(args));
@@ -109,7 +113,10 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
 
             // Change the scale
             Transform::from_scale(Vec3::new(0.45, 0.45, 1.0)),
-
+            
+            // Make this cursor gamepad controlled
+            //GamepadCursor::new(),
+            
             // Change the sprite
             Sprite {
                 image: asset_server.load("images/ui/cursor.png"),
