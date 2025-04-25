@@ -101,10 +101,17 @@ fn preload(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atlas_layout: ResMut<Assets<TextureAtlasLayout>>) {
     // Spawn the camera
     commands.spawn((
-        Camera2d, Camera { hdr: true, clear_color: ClearColorConfig::Custom(Color::srgba(0.0, 0.0, 0.0, 0.0)), ..default() }, RenderLayers::from_layers(&[0, 1]), Bloom::OLD_SCHOOL, VFXBloomFlicker, UiSourceCamera::<0>, Transform::from_translation(Vec3::Z * 1000.0),
+        Camera2d,
+        Camera { hdr: true, clear_color: ClearColorConfig::Custom(Color::srgba(0.0, 0.0, 0.0, 0.0)), ..default() },
+        RenderLayers::from_layers(&[0, 1]),
+        Bloom::OLD_SCHOOL,
+        Msaa::Sample4,
+        VFXBloomFlicker,
+        UiSourceCamera::<0>,
+        Transform::from_translation(Vec3::Z * 1000.0),
     )).with_children(|cam| {
 
-        // Spawn cursor
+        /* // Spawn cursor
         cam.spawn ((
             SoftwareCursor::new()
                 .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
@@ -128,7 +135,7 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
                 anchor: Anchor::TopLeft,
                 ..default()
             },
-        ));
+        )); */
 
     });
 }
@@ -136,7 +143,7 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
 /// This is a generic system that will despawn all entities with attached component S.
 fn despawn_scene<S: Component>(mut commands: Commands, query: Query<Entity, With<S>>) {
     for entity in &query {
-        commands.entity(entity).despawn_recursive();
+        commands.entity(entity).despawn();
     }
 }
 
@@ -232,6 +239,7 @@ impl MainMenuScene {
                         let mut button_entity = ui.spawn((
                             Name::new(button),
                             UiLayout::window().y(Rl(offset)).size(Rl((100.0, size))).pack(),
+                            Visibility::Visible,
                             OnHoverSetCursor::new(bevy::window::SystemCursorIcon::Pointer),
                         ));
                         button_entity.with_children(|ui| {
@@ -252,11 +260,11 @@ impl MainMenuScene {
                                 Sprite {
                                     image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
                                     // Here we enable sprite slicing
-                                    image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                    image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::all(32.0), ..default() }),
                                     ..default()
                                 },
                                 // Make sure it does not cover the bounding zone of parent
-                                PickingBehavior::IGNORE,
+                                Pickable::IGNORE,
                             )).with_children(|ui| {
 
                                 // Spawn the text
@@ -279,7 +287,7 @@ impl MainMenuScene {
                                         ..default()
                                     },
                                     // Make sure it does not cover the bounding zone of parent
-                                    PickingBehavior::IGNORE,
+                                    Pickable::IGNORE,
                                 ));
 
                                 // Spawn the fluff
@@ -300,6 +308,8 @@ impl MainMenuScene {
                                         font_size: 64.0,
                                         ..default()
                                     },
+                                    // Make sure it does not cover the bounding zone of parent
+                                    Pickable::IGNORE,
                                 ));
                             });
 
@@ -323,12 +333,12 @@ impl MainMenuScene {
                             "Quit Game" => {
                                 button_entity.observe(|_: Trigger<Pointer<Click>>, mut exit: EventWriter<AppExit>| {
                                     // Close the app
-                                    exit.send(AppExit::Success);
+                                    exit.write(AppExit::Success);
                                 });
                             },
                             _ => {
                                 button_entity.observe(|c_trigger: Trigger<Pointer<Click>>, c_button: Query<NameOrEntity, With<UiLayout>>| {
-                                    info!("Clicked: {}", c_button.get(c_trigger.entity()).unwrap());
+                                    info!("Clicked: {}", c_button.get(c_trigger.target()).unwrap());
                                 });
                             }
                         }
@@ -480,7 +490,7 @@ impl NewGameScene {
                 UiLayout::window().full().pack(),
                 Sprite::from_image(image_handle),
                 UiEmbedding,
-                PickingBehavior {
+                Pickable {
                     should_block_lower: false,
                     is_hoverable: true,
                 },
@@ -509,11 +519,11 @@ impl NewGameScene {
                     Sprite {
                         image: asset_server.load("images/ui/components/button_sliced_bottom_right.png"),
                         // Here we enable sprite slicing
-                        image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                        image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::all(32.0), ..default() }),
                         ..default()
                     },
                     // Make sure it does not cover the bounding zone of parent
-                    PickingBehavior::IGNORE,
+                    Pickable::IGNORE,
                 )).with_children(|ui| {
 
                     // Spawn the text
@@ -535,7 +545,7 @@ impl NewGameScene {
                             ..default()
                         },
                         // Make sure it does not cover the bounding zone of parent
-                        PickingBehavior::IGNORE,
+                        Pickable::IGNORE,
                     ));
                 });
 
@@ -609,11 +619,11 @@ impl NewGameScene {
                                         Sprite {
                                             image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
                                             // Here we enable sprite slicing
-                                            image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                            image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::all(32.0), ..default() }),
                                             ..default()
                                         },
                                         // Make sure it does not cover the bounding zone of parent
-                                        PickingBehavior::IGNORE,
+                                        Pickable::IGNORE,
                                     )).with_children(|ui| {
 
                                         // Spawn the text
@@ -635,7 +645,7 @@ impl NewGameScene {
                                                 ..default()
                                             },
                                             // Make sure it does not cover the bounding zone of parent
-                                            PickingBehavior::IGNORE,
+                                            Pickable::IGNORE,
                                         ));
                                     });
                                 });
@@ -653,10 +663,10 @@ impl NewGameScene {
                                         ]),
                                         Sprite {
                                             image: asset_server.load("images/ui/components/button_sliced_bottom_left.png"),
-                                            image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                            image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::all(32.0), ..default() }),
                                             ..default()
                                         },
-                                        PickingBehavior::IGNORE,
+                                        Pickable::IGNORE,
                                     )).with_children(|ui| {
                                         ui.spawn((
                                             Name::new("Chevron Left"),
@@ -684,10 +694,10 @@ impl NewGameScene {
                                         ]),
                                         Sprite {
                                             image: asset_server.load("images/ui/components/button_sliced_bottom_right.png"),
-                                            image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                            image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::all(32.0), ..default() }),
                                             ..default()
                                         },
-                                        PickingBehavior::IGNORE,
+                                        Pickable::IGNORE,
                                     )).with_children(|ui| {
                                         ui.spawn((
                                             Name::new("Chevron Right"),
@@ -835,10 +845,10 @@ impl SettingsScene {
                                     ]),
                                     Sprite {
                                         image: asset_server.load("images/ui/components/button_symetric_sliced.png"),
-                                        image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::square(32.0), ..default() }),
+                                        image_mode: SpriteImageMode::Sliced(TextureSlicer { border: BorderRect::all(32.0), ..default() }),
                                         ..default()
                                     },
-                                    PickingBehavior::IGNORE,
+                                    Pickable::IGNORE,
                                 )).with_children(|ui| {
 
                                     // Spawn the text
@@ -856,7 +866,7 @@ impl SettingsScene {
                                             font_size: 64.0,
                                             ..default()
                                         },
-                                        PickingBehavior::IGNORE,
+                                        Pickable::IGNORE,
                                     ));
                                 });
 
@@ -889,7 +899,7 @@ impl SettingsScene {
                 ..default()
             },
             // Render this ui to our new camera
-            TargetCamera(texture_camera),
+            UiTargetCamera(texture_camera),
             // A scene marker for later mass scene despawn, not UI related
             SettingsScene
         )).with_children(|parent| {

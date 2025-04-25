@@ -34,7 +34,7 @@
   bevy_lunex = { workspace = true }
 
   # PHYSICS
-  avian3d = { workspace = true }
+  #avian3d = { workspace = true }
 
   # OTHER
   clap = { workspace = true }

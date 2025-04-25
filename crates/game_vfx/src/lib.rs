@@ -216,11 +216,7 @@ pub fn slide_in_animation(t: f32, text: &str) -> String {
     let center = text.len() / 2;
 
     for (i, c) in text.chars().enumerate() {
-        let distance_from_center = if i < center {
-            center - i
-        } else {
-            i - center
-        };
+        let distance_from_center = center.abs_diff(i);
 
         let char_progress = t * 2.0 - (distance_from_center as f32 / center as f32);
 

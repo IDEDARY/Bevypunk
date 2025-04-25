@@ -1,4 +1,4 @@
-use bevy::{prelude::*, utils::HashMap};
+use bevy::{prelude::*, platform::collections::HashMap};
 use vleue_kinetoscope::*;
 
 /// This struct can be spawned to hold handles you wish not

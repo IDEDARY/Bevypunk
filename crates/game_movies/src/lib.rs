@@ -54,7 +54,7 @@ impl Movie {
                             movie.audio_ins = Some(audio.play(movie.audio_src.clone()).handle());
                         }
                         MoviePlayback::Despawn => {
-                            commands.entity(entity).despawn_recursive();
+                            commands.entity(entity).despawn();
                         }
                         _ => {
                             movie.state = MovieState::Ended

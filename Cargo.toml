@@ -47,7 +47,7 @@
   #=== GAME ENGINE SOURCE === #
 
   # GAME ENGINE
-  bevy = { version = "^0.15.2", default-features = false, features = [
+  bevy = { version = "^0.16.0", default-features = false, features = [
     "animation",
     "bevy_asset",
     "bevy_color",
@@ -87,21 +87,23 @@
 
   # ASSETS
   vleue_kinetoscope = { git = "https://github.com/vleue/vleue_kinetoscope" }
-  bevy_embedded_assets = { version = "^0.12.0" }
+  #bevy_embedded_assets = { version = "^0.12.0" }
+  bevy_embedded_assets = { git = "https://github.com/vleue/bevy_embedded_assets" }
 
   # AUDIO
-  bevy_kira_audio = { version = "^0.22.0" }
+  #bevy_kira_audio = { version = "^0.22.0" }
+  bevy_kira_audio = { git = "https://github.com/NiklasEi/bevy_kira_audio", branch = "bevy_main" }
 
   # USER INTERFACE
   bevy_lunex = { path = "../bevy_lunex/crate"}
 
   # PHYSICS
-  avian3d = { version = "^0.2.1" }
+  #avian3d = { version = "^0.2.1" }
 
   #===========================#
   #=== RUST MISCELLANEOUS === #
 
   # OTHER
-  rand = { version = "^0.9.0" }
-  getrandom = { version = "0.3.1", features = ["wasm_js"]}
-  clap = { version = "^4.5.28", features = ["derive"] }
+  rand = { version = "^0.9.1" }
+  getrandom = { version = "0.3.2", features = ["wasm_js"]}
+  clap = { version = "^4.5.37", features = ["derive"] }
