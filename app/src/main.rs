@@ -111,7 +111,7 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
         Transform::from_translation(Vec3::Z * 1000.0),
     )).with_children(|cam| {
 
-        /* // Spawn cursor
+        // Spawn cursor
         cam.spawn ((
             SoftwareCursor::new()
                 .set_index(bevy::window::SystemCursorIcon::Default, 0, (14.0, 14.0))
@@ -135,7 +135,7 @@ fn spawn_camera(mut commands: Commands, asset_server: Res<AssetServer>, mut atla
                 anchor: Anchor::TopLeft,
                 ..default()
             },
-        )); */
+        ));
 
     });
 }
