@@ -6,6 +6,7 @@ use bevy::core_pipeline::bloom::Bloom;
 pub(crate) use bevy::{prelude::*, sprite::Anchor, render::view::RenderLayers};
 pub(crate) use bevy_kira_audio::prelude::*;
 pub(crate) use bevy_lunex::*;
+use bevy_lunex::TextAnimator;
 pub(crate) use vleue_kinetoscope::*;
 
 pub(crate) use game_cameras::*;
@@ -280,7 +281,7 @@ impl MainMenuScene {
                                     UiTextSize::from(Rh(60.0)),
                                     // You can attach text like this
                                     Text2d::default(),
-                                    TextAnimator::new(button.to_ascii_uppercase()).function(decryption_animation).duration(1.0),
+                                    TextAnimator::new(button.to_ascii_uppercase()).function(game_vfx::decryption_animation).duration(1.0),
                                     TextFont {
                                         font: asset_server.load("fonts/rajdhani/Rajdhani-Medium.ttf"),
                                         font_size: 64.0,
