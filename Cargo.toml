@@ -2,46 +2,46 @@
 #=== WORKSPACE INFO ===#
 
 [workspace]
+  members  = ["app", "crates/*"]
   resolver = "2"
-  members = ["app", "crates/*"]
 
 [workspace.package]
-  authors     = ["IDEDARY"]
-  version     = "0.0.1"
-  edition     = "2021"
-  license     = "MIT OR Apache-2.0"
-  repository  = "https://github.com/idedary/bevypunk"
+  authors    = ["IDEDARY"]
+  edition    = "2021"
+  license    = "MIT OR Apache-2.0"
+  repository = "https://github.com/idedary/bevypunk"
+  version    = "0.0.1"
 
-#========================#
-#=== PROFILE SETTINGS ===#
+  #========================#
+  #=== PROFILE SETTINGS ===#
 
 [profile.dev]
-  debug = 0
-  strip = "debuginfo"
+  debug     = 0
   opt-level = 1
+  strip     = "debuginfo"
 
 [profile.dev.package."*"]
   opt-level = 3
 
 [profile.release]
-  opt-level = 3
-  panic = 'abort'
-  debug = 0
-  strip = true
-  lto = "thin"
   codegen-units = 1
+  debug         = 0
+  lto           = "thin"
+  opt-level     = 3
+  panic         = 'abort'
+  strip         = true
 
-#===============================#
-#=== DEPENDENCIES & FEATURES ===#
+  #===============================#
+  #=== DEPENDENCIES & FEATURES ===#
 
 [workspace.dependencies]
 
   # GAME CRATES
-  game_cameras = { path = "crates/game_cameras" }
-  game_loading = { path = "crates/game_loading" }
-  game_movies = { path = "crates/game_movies" }
+  game_cameras     = { path = "crates/game_cameras" }
+  game_loading     = { path = "crates/game_loading" }
+  game_movies      = { path = "crates/game_movies" }
   game_preferences = { path = "crates/game_preferences" }
-  game_vfx = { path = "crates/game_vfx" }
+  game_vfx         = { path = "crates/game_vfx" }
 
   #===========================#
   #=== GAME ENGINE SOURCE === #
@@ -70,31 +70,31 @@
     "bevy_winit",
     "custom_cursor",
     "hdr",
+    "jpeg",
     "multi_threaded",
     "png",
-    "jpeg",
     "smaa_luts",
     "sysinfo_plugin",
     "tonemapping_luts",
     "webgl2",
     #"webgpu",
     "x11",
-  ]}
+  ] }
   log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
 
   #===============================#
   #=== GAME ENGINE EXTENSIONS === #
 
   # ASSETS
-  vleue_kinetoscope = { git = "https://github.com/vleue/vleue_kinetoscope" }
-  #bevy_embedded_assets = { version = "^0.12.0" }
-  bevy_embedded_assets = { git = "https://github.com/vleue/bevy_embedded_assets" }
+  bevy_embedded_assets = { version = "^0.13.0" }
+  vleue_kinetoscope    = { git = "https://github.com/vleue/vleue_kinetoscope" }
+  #bevy_embedded_assets = { git = "https://github.com/vleue/bevy_embedded_assets" }
 
   # AUDIO
   bevy_kira_audio = { version = "^0.23.0" }
 
   # USER INTERFACE
-  bevy_lunex = { version = "^0.4.2", features = []}
+  bevy_lunex = { version = "^0.4.2", features = [] }
 
   # PHYSICS
   #avian3d = { version = "^0.2.1" }
@@ -103,6 +103,6 @@
   #=== RUST MISCELLANEOUS === #
 
   # OTHER
-  rand = { version = "^0.9.2" }
-  getrandom = { version = "0.3.3", features = ["wasm_js"]}
-  clap = { version = "^4.5.48", features = ["derive"] }
+  clap      = { version = "^4.5.48", features = ["derive"] }
+  getrandom = { version = "0.3.3", features = ["wasm_js"] }
+  rand      = { version = "^0.9.2" }

@@ -358,7 +358,7 @@ impl MainMenuScene {
                     UiTextSize::from(Rw(3.5)),
                     // You can attach text like this
                     Text2d::new(""),
-                    TextAnimator::new("BEVY 0.15.3").function(typing_animation).duration(3.0),
+                    TextAnimator::new("BEVY 0.16.1").function(typing_animation).duration(3.0),
                     TextFont {
                         font: asset_server.load("fonts/rajdhani/Rajdhani-Bold.ttf"),
                         font_size: 48.0,
@@ -376,7 +376,7 @@ impl MainMenuScene {
                     UiTextSize::from(Rw(5.5)),
                     // You can attach text like this
                     Text2d::new(""),
-                    TextAnimator::new("v0.3.0").function(typing_animation).duration(3.0),
+                    TextAnimator::new("v0.4.2").function(typing_animation).duration(3.0),
                     TextFont {
                         font: asset_server.load("fonts/rajdhani/Rajdhani-Bold.ttf"),
                         font_size: 48.0,
@@ -561,7 +561,7 @@ impl NewGameScene {
 
                 ui.spawn((
                     UiLayout::window().x(Rl(50.0)).anchor(Anchor::TopCenter).size(Rl(100.0)).pack(),
-                    //Sprite::from(asset_server.load("images/ui/panel_full.png"))
+                    Sprite::from(asset_server.load("images/ui/panel_full.png"))
                 )).with_children(|ui| {
 
                     // Spawn the text
@@ -583,7 +583,7 @@ impl NewGameScene {
                     // Spawn button boundary
                     ui.spawn((
                         Name::new("Button List"),
-                        UiLayout::window().pos(Rl((50.0, 18.0))).anchor(Anchor::TopCenter).size(Rl((80.0, 62.0))).pack(),
+                        UiLayout::window().pos(Rl((52.5, 18.0))).anchor(Anchor::TopCenter).size(Rl((65.0, 62.0))).pack(),
                     )).with_children(|ui| {
 
                         // Spawn buttons
@@ -741,7 +741,7 @@ impl NewGameScene {
                 UiLayout::window().full().pack(),
                 // Provide a material to this mesh
                 MeshMaterial3d(materials.add(StandardMaterial {
-                    base_color_texture: Some(asset_server.load("images/ui/panel_draft.png")),
+                    base_color_texture: Some(asset_server.load("images/ui/panel.png")),
                     alpha_mode: AlphaMode::Blend,
                     unlit: true,
                     ..default()

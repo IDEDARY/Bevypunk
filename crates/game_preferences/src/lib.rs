@@ -1,7 +1,7 @@
 use bevy::{app::PluginGroupBuilder, prelude::*, render::{settings::{PowerPreference, RenderCreation, WgpuSettings}, RenderPlugin}, window::{PresentMode, WindowMode, WindowResolution}};
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use bevy_kira_audio::AudioPlugin;
-use bevy_lunex::UiLunexPlugin;
+use bevy_lunex::UiLunexPlugins;
 use vleue_kinetoscope::AnimatedImagePlugin;
 use clap::Parser;
 
@@ -69,7 +69,8 @@ impl PluginGroup for BevyPlugins {
         });
 
         // Add 3rd-party Bevy plugins
-        builder = builder.add(AnimatedImagePlugin).add(AudioPlugin).add(UiLunexPlugin);
+        builder = builder.add_group(UiLunexPlugins);
+        builder = builder.add(AnimatedImagePlugin).add(AudioPlugin);
 
         // Return the plugin group
         builder
