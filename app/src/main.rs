@@ -180,7 +180,7 @@ impl MainMenuScene {
     fn spawn(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
         // Start playing the music
         if !audio.is_playing_sound() {
-            audio.play(asset_server.load("audio/main_menu.ogg")).looped().fade_in(AudioTween::new(Duration::new(2, 0), AudioEasing::OutPowf(2.0)));
+            audio.play(asset_server.load("audio/main_menu.ogg")).with_volume(0.5).looped().fade_in(AudioTween::new(Duration::new(2, 0), AudioEasing::OutPowf(2.0)));
         }
 
         // Create UI

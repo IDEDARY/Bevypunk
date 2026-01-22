@@ -51,7 +51,7 @@ impl Movie {
                     match movie.playback {
                         MoviePlayback::Repeat => {
                             controller.reset();
-                            movie.audio_ins = Some(audio.play(movie.audio_src.clone()).handle());
+                            movie.audio_ins = Some(audio.play(movie.audio_src.clone()).with_volume(0.5).handle());
                         }
                         MoviePlayback::Despawn => {
                             commands.entity(entity).despawn();
