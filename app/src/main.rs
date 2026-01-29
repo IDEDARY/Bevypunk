@@ -41,7 +41,7 @@ fn main() -> AppExit {
     let mut args = Args::parse();
 
     #[cfg(target_arch = "wasm32")]
-    {args.skip_intro = true;}
+    {args.skip_intro = false; args.lowram = true;}
 
     // Add all Bevy plugins
     app.add_plugins(BevyPlugins(args));
@@ -58,8 +58,17 @@ fn main() -> AppExit {
     // Load the game intro if required
     if !args.skip_intro {
         let intro = AnimatedImageLoader::load_now_from_bytes(
-            if args.lowram { include_bytes!("../../assets/movies/intro_720p.webp") } else { include_bytes!("../../assets/movies/intro_1080p.webp") },
-            "webp", &mut app).expect("Priority load failed");
+            #[cfg(target_arch = "wasm32")]
+            {
+                include_bytes!("../../art/movies/intro_1080p2.webp")
+            },
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                if args.lowram { include_bytes!("../../art/movies/intro_720p.webp") } else { include_bytes!("../../art/movies/intro_1080p2.webp") }
+            },
+            "webp",
+            &mut app
+        ).expect("Priority load failed");
         priority_assets.video.insert("intro".to_string(), intro);
     }
 

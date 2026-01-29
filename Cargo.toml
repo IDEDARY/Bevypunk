@@ -27,7 +27,7 @@
   codegen-units = 1
   debug         = 0
   lto           = "thin"
-  opt-level     = 3
+  opt-level     = "z"
   panic         = 'abort'
   strip         = true
 
