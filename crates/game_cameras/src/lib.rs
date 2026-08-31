@@ -9,7 +9,7 @@ pub struct ShowcaseCamera {
     pub zoom_scale: f32,
 }
 impl ShowcaseCamera {
-    fn rotate(mut mouse_motion_events: EventReader<MouseMotion>, mouse_input: Res<ButtonInput<MouseButton>>, mut query: Query<(&ShowcaseCamera, &mut Transform)>) {
+    fn rotate(mut mouse_motion_events: MessageReader<MouseMotion>, mouse_input: Res<ButtonInput<MouseButton>>, mut query: Query<(&ShowcaseCamera, &mut Transform)>) {
         let mut delta = Vec2::ZERO;
         if mouse_input.pressed(MouseButton::Left) {
             delta = mouse_motion_events.read().map(|e| e.delta).sum();
@@ -41,7 +41,7 @@ impl ShowcaseCamera {
             transform.translation.y += -tz;
         }
     }
-    fn zoom(mut mouse_wheel_events: EventReader<MouseWheel>, mut query: Query<&mut ShowcaseCamera>) {
+    fn zoom(mut mouse_wheel_events: MessageReader<MouseWheel>, mut query: Query<&mut ShowcaseCamera>) {
         let delta: f32 = mouse_wheel_events.read().map(|e| e.y).sum();
         for mut camera in &mut query {
             if camera.zoom_scale != 0.0 {

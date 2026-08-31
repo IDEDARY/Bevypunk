@@ -43,11 +43,11 @@ impl Movie {
                 let audio_stopped = audio_instance.state() == PlaybackState::Stopped;
 
                 // Stop movie from looping if it ended
-                if video_stopped && !controller.paused() { controller.pause();}
+                if video_stopped && !controller.is_paused() { controller.pause();}
 
                 // Movie ended
                 if video_stopped && audio_stopped && movie.state != MovieState::Ended {
-                    commands.trigger_targets(MovieEnded, entity);
+                    commands.trigger(MovieEnded { entity });
                     match movie.playback {
                         MoviePlayback::Repeat => {
                             controller.reset();
@@ -83,14 +83,16 @@ pub enum MovieState {
     Ended,
 }
 
-#[derive(Event)]
-pub struct MovieEnded;
+#[derive(EntityEvent)]
+pub struct MovieEnded {
+    #[event_target]
+    pub entity: Entity,
+}
 
 /// Plugin with VFX systems for our menu
 pub struct MoviePlugin;
 impl Plugin for MoviePlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<MovieEnded>();
         app.add_systems(Update, Movie::system);
     }
 }

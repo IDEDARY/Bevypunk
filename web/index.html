@@ -111,12 +111,10 @@
 </head>
 
 <body>
-    <!-- Clean Pill Toast -->
     <div id="audio-toast">
         Click to enable audio
     </div>
 
-    <!-- Loading Screen -->
     <div id="loading-screen">
         <div class="progress-text" style="margin-bottom:8pt">Loading the game...</div>
         <div class="progress-wrapper">
@@ -224,7 +222,12 @@
         async function run() {
             try {
                 const wasmResponse = await fetchWithProgress(WASM_PATH);
-                await init(wasmResponse);
+                
+                // Convert to ArrayBuffer to prevent streaming instantiation errors
+                const wasmBuffer = await wasmResponse.arrayBuffer();
+                
+                // Pass as an options object to resolve the deprecation warning
+                await init({ module_or_path: wasmBuffer });
 
                 // --- SUCCESS ---
                 hideLoadingScreen();

@@ -37,5 +37,4 @@
   #avian3d = { workspace = true }
 
   # OTHER
-  tracing-subscriber = { version = "=0.3.19", features = ["env-filter"] }
   clap = { workspace = true }

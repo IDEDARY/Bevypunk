@@ -1,4 +1,4 @@
-use bevy::{app::PluginGroupBuilder, prelude::*, render::{settings::{PowerPreference, RenderCreation, WgpuSettings}, RenderPlugin}, window::{PresentMode, WindowMode, WindowResolution}};
+use bevy::{app::PluginGroupBuilder, prelude::*, picking::input::PointerInputSettings, render::{settings::{PowerPreference, RenderCreation, WgpuSettings}, RenderPlugin}, window::{PresentMode, WindowMode, WindowResolution}};
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use bevy_kira_audio::AudioPlugin;
 use bevy_lunex::UiLunexPlugins;
@@ -27,6 +27,17 @@ pub struct Args {
 }
 
 
+/// Plugin disabling the builtin pointer input, since Lunex uses its own software cursor.
+struct DisablePointerInput;
+impl Plugin for DisablePointerInput {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(PointerInputSettings {
+            is_mouse_enabled: false,
+            is_touch_enabled: false,
+        });
+    }
+}
+
 /// Plugin group implementing minimal default logic.
 pub struct BevyPlugins(pub Args);
 impl PluginGroup for BevyPlugins {
@@ -45,7 +56,7 @@ impl PluginGroup for BevyPlugins {
                 title: "Bevypunk".into(),
                 mode: if self.0.windowed { WindowMode::Windowed } else { WindowMode::BorderlessFullscreen(MonitorSelection::Current) },
                 present_mode: PresentMode::AutoVsync,
-                resolution: WindowResolution::new(1280.0, 720.0),
+                resolution: WindowResolution::new(1280, 720),
                 ..default()
             }),
             ..default()
@@ -54,19 +65,16 @@ impl PluginGroup for BevyPlugins {
         // Set render plugin to pick high performance GPU
         builder = builder.set(RenderPlugin {
             render_creation: RenderCreation::Automatic(
-                WgpuSettings {
+                Box::new(WgpuSettings {
                     power_preference: if !self.0.powersaver { PowerPreference::HighPerformance } else { PowerPreference::LowPower },
                     ..default()
-                }
+                })
             ),
             ..default()
         });
 
         // Disable the buildin pointers
-        builder = builder.set(PointerInputPlugin { 
-            is_mouse_enabled: false,
-            is_touch_enabled: false,
-        });
+        builder = builder.add(DisablePointerInput);
 
         // Add 3rd-party Bevy plugins
         builder = builder.add_group(UiLunexPlugins);
